@@ -35,71 +35,102 @@ export default function ThreatIntelligenceHeatmap({ selectedRegion, selectedCoun
     if (!mapContainerRef.current) return;
 
     setLoading(true);
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZGthcm1haDEiLCJhIjoiY205MDhpMDNpMGp3MzJuc2k5aWdtb2RzaCJ9.ogW0y2fJwQxSPozD4eu-9Q';
-    const mapInstance = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: [0, 0],
-      zoom: 2,
-    });
 
-    mapInstance.on('load', () => {
-      mapInstance.addSource('threats', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: mockThreatData.map((threat) => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [threat.longitude, threat.latitude],
-            },
-            properties: {
-              severity: threat.severity,
-            },
-          })),
-        },
+    try {
+      const mapInstance = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [36.8219, -1.2921], // Center on Nairobi
+        zoom: 5,
+        minZoom: 3,
+        maxZoom: 15,
+        width: mapContainerRef.current.offsetWidth,
+        height: mapContainerRef.current.offsetHeight,
       });
 
-      mapInstance.addLayer({
-        id: 'threat-heatmap',
-        type: 'heatmap',
-        source: 'threats',
-        paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'severity'], 0, 0, 5, 1],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
-          'heatmap-color': [
-            'interpolate',
-            ['linear'],
-            ['heatmap-density'],
-            0, 'rgba(33,102,172,0)',
-            0.2, 'rgb(103,169,207)',
-            0.4, 'rgb(209,229,240)',
-            0.6, 'rgb(253,219,199)',
-            0.8, 'rgb(239,138,98)',
-            1, 'rgb(178,24,43)',
-          ],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
-        },
+      mapInstance.on('error', (error) => {
+        console.error('Mapbox error:', error);
+        setLoading(false);
       });
-      
+
+      mapInstance.on('load', () => {
+        mapInstance.addSource('threats', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: mockThreatData.map((threat) => ({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [threat.longitude, threat.latitude],
+              },
+              properties: {
+                severity: threat.severity,
+              },
+            })),
+          },
+        });
+
+        mapInstance.addLayer({
+          id: 'threat-heatmap',
+          type: 'heatmap',
+          source: 'threats',
+          paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'severity'], 0, 0, 5, 1],
+            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(33,102,172,0)',
+              0.2, 'rgb(103,169,207)',
+              0.4, 'rgb(209,229,240)',
+              0.6, 'rgb(253,219,199)',
+              0.8, 'rgb(239,138,98)',
+              1, 'rgb(178,24,43)',
+            ],
+            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
+          },
+        });
+
+        setLoading(false);
+      });
+
+      setMap(mapInstance);
+
+      const handleResize = () => {
+        if (mapInstance) {
+          mapInstance.resize();
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        mapInstance?.remove();
+      };
+    } catch (error) {
+      console.error('Error initializing map:', error);
       setLoading(false);
-    });
-
-    setMap(mapInstance);
-
-    return () => mapInstance.remove();
+    }
   }, [selectedRegion, selectedCountry, timeframe]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-bold text-lg text-gray-800 flex items-center">
           <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
           Threat Intelligence
         </h2>
       </div>
-      <div ref={mapContainerRef} className="h-60 rounded-lg overflow-hidden" />
+      <div className="flex-1 min-h-[300px] relative rounded-lg overflow-hidden">
+        {loading && (
+          <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+          </div>
+        )}
+        <div ref={mapContainerRef} className="absolute inset-0" />
+      </div>
     </div>
   );
 }

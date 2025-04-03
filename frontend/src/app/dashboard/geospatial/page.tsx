@@ -560,8 +560,8 @@ export default function GeospatialPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Map Area */}
-        <div className="flex-1 relative">
-          <div ref={mapContainer} className="absolute inset-0" />
+        <div className="flex-1 relative h-[calc(100vh-64px)] bg-gray-50"> {/* Added explicit height and background */}
+          <div ref={mapContainer} className="absolute inset-0 w-full h-full" /> {/* Added explicit width and height */}
 
           {/* User Guide Overlay */}
           {showGuide && (

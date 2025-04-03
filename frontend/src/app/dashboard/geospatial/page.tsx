@@ -17,7 +17,7 @@ import {
 } from '@/data/mock/data';
 import { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiZGthcm1haDEiLCJhIjoiY205MDhpMDNpMGp3MzJuc2k5aWdtb2RzaCJ9.ogW0y2fJwQxSPozD4eu-9Q';
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
 // Enhanced GeoJSON data with more test points
 const securityIncidentsGeoJSON: FeatureCollection = {

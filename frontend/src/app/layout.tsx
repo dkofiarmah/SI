@@ -5,7 +5,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 // Initialize mapboxgl token
 import mapboxgl from "mapbox-gl";
-mapboxgl.accessToken = "pk.eyJ1IjoiZGthcm1haDEiLCJhIjoiY205MDhpMDNpMGp3MzJuc2k5aWdtb2RzaCJ9.ogW0y2fJwQxSPozD4eu-9Q";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
 
 const inter = Inter({ subsets: ["latin"] });
 

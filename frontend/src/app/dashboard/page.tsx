@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   Filter, ChevronDown, TrendingUp, AlertCircle, AlertTriangle,
   Building, BarChart, Map, User, Upload, Database, Globe, FileSpreadsheet,
-  Waves, Link, Settings as SettingsIcon, Save, Clock
+  Waves, Link, Settings as SettingsIcon, Save, Clock, ExternalLink, FileText
 } from 'lucide-react';
 import DashboardHeader from '@/components/DashboardHeader';
 import StabilityMap from '@/components/StabilityMap';
@@ -498,107 +498,133 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Key Entities (conditional rendering) */}
+              {/* Key Stakeholders & Entities (improved from Key Entities) */}
               {widgets.find(w => w.id === 'key-entities')?.enabled && (
                 <DraggableWrapper>
                   <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-4 drag-handle cursor-move">
-                      <h2 className="font-bold text-lg text-gray-800">Key Entities</h2>
-                      <a href="/dashboard/network" className="text-blue-600 text-sm font-medium hover:underline">
-                        Explore Network
+                      <h2 className="font-bold text-lg text-gray-800 flex items-center">
+                        <Building className="h-5 w-5 mr-2 text-indigo-600"/>Key Stakeholders
+                      </h2>
+                      <a href="/dashboard/network" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                        <ExternalLink className="h-4 w-4 mr-1.5" />
+                        Network View
                       </a>
                     </div>
+                    
+                    {/* Tab Navigation for Entity Types */}
+                    <div className="flex border-b border-gray-200 mb-3">
+                      <button className="pb-2 px-4 border-b-2 border-blue-600 text-blue-600 text-sm font-medium">People</button>
+                      <button className="pb-2 px-4 text-gray-500 hover:text-gray-700 text-sm">Organizations</button>
+                      <button className="pb-2 px-4 text-gray-500 hover:text-gray-700 text-sm">Companies</button>
+                    </div>
+                    
                     <ul className="space-y-3">
                       {[
-                        { name: "Ahmed Hassan", role: "Egyptian FinMin", type: "person", influence: 8.5, risk: "Low" },
-                        { name: "African Dev Bank", role: "Financial Inst.", type: "org", influence: 9.2, risk: "Low" }
+                        { name: "Ahmed Hassan", role: "Egyptian Finance Minister", type: "person", influence: 8.5, risk: "Low", connections: 37 },
+                        { name: "Nala Okoro", role: "Nigerian Energy Executive", type: "person", influence: 7.8, risk: "Medium", connections: 22 },
+                        { name: "Mahmoud Al-Faisal", role: "Regional Diplomat", type: "person", influence: 9.1, risk: "Low", connections: 51 }
                       ].map((entity, index) => (
                         <li 
                           key={index} 
-                          className="flex items-center p-2 -m-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                          className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer border border-gray-100"
                         >
-                          <div className={`h-9 w-9 rounded-lg mr-2.5 flex items-center justify-center text-white font-semibold text-xs ${
-                            entity.type === 'person' ? 'bg-blue-500' : 'bg-purple-500'
+                          <div className={`h-10 w-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-xs ${
+                            entity.type === 'person' ? 'bg-indigo-500' : 'bg-purple-500'
                           }`}>
                             {entity.type === 'person' ? (
-                              <User className="h-4 w-4"/>
+                              <User className="h-5 w-5"/>
                             ) : (
-                              <Building className="h-4 w-4"/>
+                              <Building className="h-5 w-5"/>
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium text-sm text-gray-800">{entity.name}</p>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <p className="font-medium text-gray-800">{entity.name}</p>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                entity.risk === 'Low' ? 'bg-green-100 text-green-800' :
+                                entity.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {entity.risk} Risk
+                              </span>
+                            </div>
                             <p className="text-xs text-gray-600">{entity.role}</p>
-                            <p className="text-xs text-gray-500">Influence: {entity.influence} | Risk: {entity.risk}</p>
+                            <div className="flex mt-1 text-xs text-gray-500">
+                              <span className="flex items-center mr-3">
+                                <BarChart className="h-3 w-3 mr-1" />
+                                Influence: {entity.influence}
+                              </span>
+                              <span className="flex items-center">
+                                <Link className="h-3 w-3 mr-1" />
+                                {entity.connections} Connections
+                              </span>
+                            </div>
                           </div>
                         </li>
                       ))}
-                      <a href="/dashboard/network" className="text-xs text-blue-600 hover:underline mt-1 block">
-                        View More...
+                      <a href="/dashboard/network" className="text-sm text-blue-600 hover:underline mt-2 flex items-center justify-center py-2 bg-blue-50 rounded-md">
+                        View All Stakeholders
                       </a>
                     </ul>
                   </div>
                 </DraggableWrapper>
               )}
               
-              {/* You can add more sidebar widgets here */}
-              
+              {/* Latest Intelligence Reports (moved from below) */}
+              {widgets.find(w => w.id === 'reports-table')?.enabled && (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="font-bold text-lg text-gray-800 flex items-center">
+                      <FileText className="h-5 w-5 mr-2 text-emerald-600"/>Latest Reports
+                    </h2>
+                    <a href="/dashboard/reports" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
+                      <ExternalLink className="h-4 w-4 mr-1.5" />
+                      Browse All
+                    </a>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {mockReports.slice(0, 3).map((report) => {
+                      const confColorClasses: Record<string, string> = {
+                        green: 'bg-green-100 text-green-800',
+                        yellow: 'bg-yellow-100 text-yellow-800',
+                        red: 'bg-red-100 text-red-800'
+                      };
+                      
+                      return (
+                        <div key={report.id} className="p-3 border border-gray-100 rounded-lg hover:border-blue-200 hover:bg-blue-50 transition-colors cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <h3 className="font-medium text-gray-800">{report.title}</h3>
+                            <span className={`ml-2 px-2 py-0.5 ${confColorClasses[report.confColor]} rounded-full text-xs font-medium shrink-0`}>
+                              {report.confidence}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex items-center text-xs text-gray-500">
+                            <Globe className="h-3 w-3 mr-1" />
+                            <span>{report.region}</span>
+                            <span className="mx-1.5">•</span>
+                            <Clock className="h-3 w-3 mr-1" />
+                            <span>{report.date}</span>
+                          </div>
+                          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{report.summary}</p>
+                          <div className="mt-2 flex justify-end">
+                            <a href={`/dashboard/report/${report.id}`} className="text-blue-600 hover:text-blue-800 text-xs flex items-center">
+                              View Report
+                              <ChevronDown className="h-3 w-3 ml-1 rotate-270" />
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <a href="/dashboard/reports" className="block text-center py-2 text-sm text-blue-600 hover:underline">
+                      View All Reports
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Latest Reports Table (conditional rendering) */}
-          {widgets.find(w => w.id === 'reports-table')?.enabled && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 overflow-x-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-bold text-lg text-gray-800">Latest Intelligence Reports</h2>
-                <a href="/dashboard/reports" className="text-blue-600 text-sm font-medium hover:underline">
-                  Browse All Reports
-                </a>
-              </div>
-              <table className="w-full min-w-[600px] text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="py-3 font-medium">Report Title</th>
-                    <th className="py-3 font-medium">Region</th>
-                    <th className="py-3 font-medium">Category</th>
-                    <th className="py-3 font-medium">Date</th>
-                    <th className="py-3 font-medium">Confidence</th>
-                    <th className="py-3 font-medium text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockReports.map((report) => {
-                    const confColorClasses: Record<string, string> = {
-                      green: 'bg-green-100 text-green-800',
-                      yellow: 'bg-yellow-100 text-yellow-800',
-                      red: 'bg-red-100 text-red-800'
-                    };
-                    
-                    return (
-                      <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 pr-3 font-medium text-gray-800">
-                          {report.title}
-                        </td>
-                        <td className="py-3 pr-3 text-gray-600">{report.region}</td>
-                        <td className="py-3 pr-3 text-gray-600">{report.category}</td>
-                        <td className="py-3 pr-3 text-gray-600">{report.date}</td>
-                        <td className="py-3 pr-3">
-                          <span className={`px-2 py-0.5 ${confColorClasses[report.confColor]} rounded-full text-xs font-medium`}>
-                            {report.confidence}
-                          </span>
-                        </td>
-                        <td className="py-3 text-right">
-                          <a href={`/dashboard/report/${report.id}`} className="text-blue-600 hover:underline font-medium">
-                            View
-                          </a>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </>
       )}
 

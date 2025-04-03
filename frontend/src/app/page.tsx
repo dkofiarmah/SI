@@ -259,26 +259,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Beta Program */}
-      <section id="beta" className="py-16 bg-blue-600 text-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6">Join Our Beta Program Today</h2>
-            <p className="text-lg text-blue-100 mb-8">
-              We're selecting organizations to help refine our platform. Get early access and share your feedback to shape the tools you'll use.
-            </p>
-            <Link 
-              href="/auth/register" 
-              className="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-md hover:bg-blue-50 transition-colors font-medium"
-            >
-              Apply for Access
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <p className="mt-4 text-sm text-blue-200">Limited spots available. We review all applications within 48 hours.</p>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400 py-12">
         <div className="container mx-auto px-6">

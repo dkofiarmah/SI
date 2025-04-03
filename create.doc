@@ -1,0 +1,78 @@
+savannah-intelligence/
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py                       # FastAPI app entry point
+│   │   ├── config.py                     # Global configuration (env variables, Supabase, Neo4j, LLM keys)
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── endpoints/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── auth.py             # Authentication endpoints (Supabase integration)
+│   │   │   │   ├── entities.py         # CRUD and search endpoints for entities (Person, Org, etc.)
+│   │   │   │   ├── news.py             # Endpoints for curated news and summaries
+│   │   │   │   ├── ingestion.py        # Endpoints to trigger or monitor data ingestion jobs
+│   │   │   │   ├── analytics.py        # Endpoints for trend, risk, and scenario analytics
+│   │   │   ├── dependencies.py         # Shared dependencies (database sessions, authentication)
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── logger.py               # Configured logging (with Sentry integration)
+│   │   │   ├── exceptions.py           # Custom exception handlers
+│   │   │   ├── utils.py                # Utility functions for formatting, date conversions, etc.
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── entity.py               # Pydantic models for Person, Organization, Place, Event, Country
+│   │   │   ├── news.py                 # Models for news articles and summaries
+│   │   │   ├── user.py                 # Models for user profiles, roles, etc.
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── ingestion_service.py    # Business logic for scraping and data ingestion (ScrapegraphAI/FireCrawl)
+│   │   │   ├── cleaning_service.py     # Deduplication and normalization routines
+│   │   │   ├── llm_engine.py           # Integration with OpenAI, Gemini, DeepSeek & LangChain workflows
+│   │   │   ├── news_service.py         # AI-based news summarization and entity extraction
+│   │   │   ├── neo4j_service.py        # Graph operations (CRUD, relationship mapping) with Neo4j
+│   │   │   ├── supabase_service.py     # Interfacing with Supabase (DB, auth, realtime, storage)
+│   │   │   ├── langchain_service.py    # Orchestrating LLM chains and retrieval-augmented generation (RAG)
+│   │   ├── tasks/
+│   │   │   ├── __init__.py
+│   │   │   ├── scheduled_tasks.py      # Background jobs (e.g., nightly ingestion, LLM updates)
+│   │   ├── db/
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py                 # Database connection and initialization (Supabase/PostgreSQL)
+│   │   │   ├── models.py               # SQLAlchemy models if needed for relational data
+│   │   │   ├── session.py              # Database session management
+│   │   ├── tests/
+│   │       ├── __init__.py
+│   │       ├── test_api.py             # API endpoint tests
+│   │       ├── test_services.py        # Unit tests for ingestion, cleaning, and LLM services
+│   ├── requirements.txt                # Python dependencies list
+│   ├── README.md                       # Backend documentation
+│   ├── .env.example                    # Environment variable template
+│   └── vercel.json                     # (Optional) Configuration for deploying FastAPI as serverless functions
+├── frontend/
+│   ├── components/
+│   │   ├── Layout.jsx                  # Global layout component
+│   │   ├── Navbar.jsx                  # Navigation bar
+│   │   ├── GraphViewer.jsx             # Interactive network/graph visualization (D3.js/Tremor)
+│   │   ├── NewsFeed.jsx                # Component for curated news feed with summaries
+│   │   ├── Dashboard.jsx               # Main dashboard for analytics & entity details
+│   ├── pages/
+│   │   ├── _app.jsx                    # Custom App component (global CSS, providers)
+│   │   ├── index.jsx                   # Homepage landing, overview dashboard
+│   │   ├── entities/
+│   │   │   ├── [id].jsx                # Dynamic route for detailed entity view
+│   │   ├── news.jsx                    # Page for browsing news by category/location
+│   │   ├── login.jsx                   # Authentication page integrated with Supabase
+│   ├── public/
+│   │   ├── assets/                     # Static images, icons, etc.
+│   ├── styles/
+│   │   ├── globals.css                 # Global CSS
+│   │   ├── theme.css                   # Custom theme variables
+│   ├── next.config.js                  # Next.js configuration
+│   ├── package.json                    # Frontend dependencies and scripts
+│   ├── README.md                       # Frontend documentation
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                      # CI/CD pipeline config for GitHub Actions (build, test, deploy)
+├── .env.example                        # Global environment variable template (shared secrets)
+├── README.md                           # Project overview and instructions

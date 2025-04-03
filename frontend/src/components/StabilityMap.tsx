@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import EnhancedDashboardCard from './EnhancedDashboardCard';
 
-// Initialize Mapbox with your access token
-mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN'; // Replace with your actual Mapbox token
+// Initialize Mapbox access token from environment variable
+if (!mapboxgl.accessToken) {
+  mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || "";
+}
 
 interface StabilityMapProps {
   selectedRegion?: string;

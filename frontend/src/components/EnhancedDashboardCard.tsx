@@ -247,27 +247,27 @@ export default function EnhancedDashboardCard({
     
     return (
       <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-10 p-3">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-2 border-b pb-2 border-gray-100">
           <h3 className="font-medium text-gray-800 flex items-center">
             <Info className="h-4 w-4 mr-1.5 text-blue-600" />
             Data Sources
           </h3>
           <button 
             onClick={() => setShowDataSourcesInfo(false)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 bg-gray-100 rounded-full w-6 h-6 flex items-center justify-center"
           >
             ×
           </button>
         </div>
         
-        <div className="text-xs text-gray-600 mb-3">
+        <div className="text-xs text-gray-600 mb-3 bg-blue-50 p-2 rounded-md">
           This analysis is powered by {dataSources.length} data source{dataSources.length !== 1 ? 's' : ''} with 
-          an average reliability of {averageReliability}%.
+          an average reliability of <span className="font-semibold">{averageReliability}%</span>.
         </div>
         
         <div className="space-y-2 max-h-60 overflow-y-auto mb-2">
           {dataSources.map(source => (
-            <div key={source.id} className="border border-gray-200 rounded p-2">
+            <div key={source.id} className="border border-gray-200 rounded p-2 bg-gray-50 hover:bg-gray-100 transition-colors duration-150">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-xs text-gray-700">{source.name}</span>
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${

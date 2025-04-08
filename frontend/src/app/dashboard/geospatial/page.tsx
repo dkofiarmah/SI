@@ -533,30 +533,28 @@ export default function GeospatialPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
-        <DashboardHeader
-          title="Geospatial Analysis"
-          description="Interactive mapping and spatial analysis tools"
-          showInfoTip
-          infoTipContent="Analyze geographic data patterns, risks, and opportunities across regions. Combine multiple data layers for comprehensive insights."
-          bgColor="white"
-          sticky
-        >
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600 font-medium">
-              Location: {currentLocationName}
-            </span>
-            <div className="flex border border-gray-200 rounded-md overflow-hidden">
-              <button className="p-1.5 hover:bg-gray-100 text-gray-600 border-r border-gray-200">
-                <Download className="h-5 w-5" />
-              </button>
-              <button className="p-1.5 hover:bg-gray-100 text-gray-600">
-                <Share2 className="h-5 w-5" />
-              </button>
-            </div>
+      <DashboardHeader
+        title="Geospatial Analysis"
+        description="Interactive mapping and spatial analysis tools"
+        showInfoTip
+        infoTipContent="Analyze geographic data patterns, risks, and opportunities across regions. Combine multiple data layers for comprehensive insights."
+        bgColor="white"
+        sticky
+      >
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600 font-medium">
+            Location: {currentLocationName}
+          </span>
+          <div className="flex border border-gray-200 rounded-md overflow-hidden">
+            <button className="p-1.5 hover:bg-gray-100 text-gray-600 border-r border-gray-200">
+              <Download className="h-5 w-5" />
+            </button>
+            <button className="p-1.5 hover:bg-gray-100 text-gray-600">
+              <Share2 className="h-5 w-5" />
+            </button>
           </div>
-        </DashboardHeader>
-      </header>
+        </div>
+      </DashboardHeader>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Map Area */}

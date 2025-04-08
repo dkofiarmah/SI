@@ -1,7 +1,19 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Entity, Alert, Report, ScenarioRun, UserPreferences, UserType } from '@/types';
-import { mockLocationData, mockAlerts, mockReports } from '@/data/mock/data';
+import type { Entity, EntityType, RiskLevel, Alert, Report, ScenarioRun, UserPreferences, UserType } from '@/types';
+import { 
+  mockLocationData, 
+  mockAlerts, 
+  mockReports, 
+  networkEntities,
+  networkConnections,
+  economicTrendData,
+  securityIncidentData,
+  stabilityIndexData,
+  detailedEntityProfiles,
+  regionalSentimentData,
+  scenarioTemplates
+} from '@/data/mock/data';
 
 interface LocationData {
   economicMetrics?: {
@@ -82,7 +94,15 @@ export const useStore = create<AppState>()(
         alerts: mockAlerts,
         reports: mockReports,
         scenarios: [],
-        entities: [],
+        entities: detailedEntityProfiles.map(entity => ({
+          id: entity.id,
+          name: entity.name,
+          type: entity.type as EntityType,
+          role: entity.role,
+          riskScore: entity.riskScore as RiskLevel,
+          connections: entity.connections,
+          lastUpdated: new Date().toISOString()
+        })),
         locationData: mockLocationData,
         userPreferences: {
           alertNotifications: {

@@ -280,7 +280,7 @@ export default function DashboardLayout({
         </nav>
         
         {/* Footer User Area */}
-        <div className={`border-t border-gray-200 mt-auto flex-shrink-0 relative ${isSidebarCollapsed ? 'p-2' : 'p-3'}`}>
+        <div className={`border-t border-gray-200 mt-auto flex-shrink-0 relative ${isSidebarCollapsed ? 'p-2' : 'p-3'} bg-gray-50`}>
           {!isSidebarCollapsed && (
             <Link 
               href="/dashboard/report/new"

@@ -11,22 +11,21 @@ import {
   Filter,
   Database,
   FileText,
-  Target
+  Target,
+  MapPin,
+  Plus,
+  Minus,
+  AlertTriangle,
+  BarChart3,
+  PieChart
 } from "lucide-react";
 import Link from "next/link";
-import DashboardPreview from "@/components/DashboardPreview";
 import Image from "next/image";
 
 export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      {/* Classification banner */}
-      <div className="classified-banner">
-        <Lock className="h-3 w-3 mr-1.5" />
-        <span>UNCLASSIFIED</span>
-      </div>
-
       {/* Header Section */}
       <header className="intel-header sticky top-0 z-10">
         <div className="container mx-auto px-6 flex items-center justify-between py-4">
@@ -41,13 +40,13 @@ export default async function HomePage() {
           </div>
           <div className="flex items-center space-x-3">
             <Link 
-              href="/auth/signin" 
+              href="/auth/signup" 
               className="px-4 py-2 text-sm font-medium text-neutral-100 hover:text-white hover:bg-primary-light rounded transition duration-150"
             >
-              Sign In
+              Sign Up
             </Link>
             <Link 
-              href="/auth/signup" 
+              href="/auth/signin" 
               className="intel-button intel-button-accent px-4 py-2 text-sm font-medium text-white flex items-center"
             >
               ACCESS PORTAL
@@ -59,7 +58,7 @@ export default async function HomePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-20 px-6 bg-primary-dark text-white relative overflow-hidden">
+        <section className="py-20 px-6 bg-[#0b1526] text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <Image 
               src="/images/world-map-dots.png" 
@@ -67,6 +66,7 @@ export default async function HomePage() {
               fill 
               style={{objectFit: "cover"}}
               priority 
+              unoptimized
             />
           </div>
           <div className="container mx-auto max-w-7xl relative">
@@ -96,9 +96,6 @@ export default async function HomePage() {
                     EXPLORE DOMAINS
                   </Link>
                 </div>
-              </div>
-              <div className="relative security-border rounded-md overflow-hidden">
-                <DashboardPreview />
               </div>
             </div>
           </div>
@@ -215,7 +212,7 @@ export default async function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 px-6 bg-primary">
+        <section className="py-16 px-6 bg-[#0b1526] text-white">
           <div className="container mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white mb-6 font-headings">READY TO JOIN THE MISSION?</h2>
             <p className="text-xl text-neutral-300 mb-8">
@@ -232,7 +229,7 @@ export default async function HomePage() {
         </section>
       </main>
 
-      <footer className="bg-primary-dark text-white py-12 px-6">
+      <footer className="text-white py-12 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>

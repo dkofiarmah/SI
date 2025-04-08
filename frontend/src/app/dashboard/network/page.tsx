@@ -133,6 +133,9 @@ export default function NetworkPage() {
           <button 
             onClick={() => setShowAnalysisPanel(true)}
             className="flex items-center bg-white border border-gray-300 rounded-md py-2 px-3 text-sm hover:bg-gray-50"
+            style={{
+              background: '#14213d',
+            }}
           >
             <Activity className="h-4 w-4 mr-1.5" />
             Analyze
@@ -258,12 +261,12 @@ export default function NetworkPage() {
                 {/* Connection 2 */}
                 <line x1="200" y1="150" x2="300" y2="100" stroke="#4A4A4A" strokeWidth="3" strokeDasharray="4 2"/>
                 <circle cx="300" cy="100" r="18" fill="#F5A623" />
-                <text x="300" y="105" textAnchor="middle" fill="white" fontSize="9">ADB</text>
+                <text x="300" y="105" textAnchor="middle" fill="#14213D" fontSize="9" fontWeight="bold">ADB</text>
                 
                 {/* Connection 3 */}
                 <line x1="200" y1="150" x2="150" y2="220" stroke="#9B9B9B" strokeWidth="1" />
                 <circle cx="150" cy="220" r="12" fill="#50E3C2" />
-                <text x="150" y="225" textAnchor="middle" fill="white" fontSize="7">UAE</text>
+                <text x="150" y="225" textAnchor="middle" fill="#14213D" fontSize="7" fontWeight="bold">UAE</text>
                 
                 {/* Connection 4 */}
                 <line x1="200" y1="150" x2="250" y2="220" stroke="#4A4A4A" strokeWidth="2" />

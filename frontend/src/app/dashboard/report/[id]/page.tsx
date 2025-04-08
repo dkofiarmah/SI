@@ -257,150 +257,6 @@ export default function ReportDetail() {
     }
   };
 
-  const renderReportContent = () => {
-    if (!report || !report.content) return null;
-
-    switch(activeTab) {
-      case 'overview':
-        return (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Executive Summary</h2>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {report.content.executiveSummary}
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Key Findings</h2>
-              <ul className="space-y-2">
-                {report.content.keyFindings.map((finding, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <span className="text-teal-500 mr-2 mt-1 flex-shrink-0">•</span>
-                    <span className="text-gray-700">{finding}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Risk Assessment</h2>
-              <div className="space-y-4">
-                {report.content.risks.map((risk, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-1">
-                      <h3 className="font-semibold text-gray-800">{risk.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        risk.level === 'High' ? 'bg-red-100 text-red-700' :
-                        risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {risk.level} Risk
-                      </span>
-                    </div>
-                    <p className="text-gray-600 text-sm">{risk.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="border-t border-gray-200 pt-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Data Visualizations</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {report.content.charts.map((chart, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                      <h3 className="font-medium text-gray-700">{chart.title}</h3>
-                    </div>
-                    <div className="p-4 h-60 bg-white flex items-center justify-center">
-                      {chart.type === 'bar' && <BarChart className="h-32 w-32 text-gray-300" />}
-                      {chart.type === 'line' && <TrendingUp className="h-32 w-32 text-gray-300" />}
-                      {chart.type === 'pie' && <PieChart className="h-32 w-32 text-gray-300" />}
-                      {chart.type === 'map' && <Map className="h-32 w-32 text-gray-300" />}
-                      <p className="text-sm text-gray-400 ml-4">Chart visualization placeholder</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        );
-      
-      case 'details':
-        return (
-          <div className="space-y-8">
-            {report.content.sections.map((section, idx) => (
-              <section key={idx}>
-                <h2 className="text-xl font-bold text-gray-800 mb-4">{section.title}</h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {section.content}
-                </p>
-              </section>
-            ))}
-          </div>
-        );
-      
-      case 'recommendations':
-        return (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Strategic Recommendations</h2>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <ul className="space-y-4">
-                  {report.content.recommendations.map((recommendation, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <Check className="h-5 w-5 text-teal-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{recommendation}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          </div>
-        );
-      
-      case 'entities':
-        return (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Key Entities</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {report.content.entities.map((entity, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-                    <div className="flex items-start">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mr-3 ${
-                        entity.type === 'Corporate' ? 'bg-blue-100 text-blue-700' :
-                        entity.type === 'Government Institution' ? 'bg-purple-100 text-purple-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {entity.type === 'Corporate' ? 
-                          <Building className="h-5 w-5" /> :
-                        entity.type === 'Government Institution' ? 
-                          <Building className="h-5 w-5" /> :
-                          <User className="h-5 w-5" />
-                        }
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{entity.name}</h3>
-                        <p className="text-sm text-gray-500">{entity.type}</p>
-                        <p className="text-sm text-gray-600 mt-1">{entity.relevance}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-gray-500 mt-4">
-                Click on any entity to view its full profile and network connections.
-              </p>
-            </section>
-          </div>
-        );
-
-      default:
-        return <div>Content not available</div>;
-    }
-  };
-
   if (!report) {
     return (
       <div className="p-6">
@@ -488,25 +344,39 @@ export default function ReportDetail() {
         </div>
       </DashboardHeader>
 
-      <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden mb-8 mt-6">
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden mb-6 mt-6">
         {/* Report author and last update info */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2">
+        <div className="p-6 border-b border-gray-200 bg-gray-50">
+          <div className="flex flex-wrap items-center text-sm text-gray-600 gap-x-4 gap-y-2">
             <div className="flex items-center">
-              <User className="h-4 w-4 mr-1.5 text-gray-400" />
-              {report.author}
+              <User className="h-4 w-4 mr-1.5 text-gray-500" />
+              {report.authorDetails?.role ? (
+                <span>
+                  <span className="font-medium">{report.author}</span>
+                  <span className="text-gray-400 mx-1">•</span>
+                  <span>{report.authorDetails.role}</span>
+                </span>
+              ) : (
+                <span>{report.author}</span>
+              )}
             </div>
             <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-1.5 text-gray-400" />
+              <Clock className="h-4 w-4 mr-1.5 text-gray-500" />
               Updated: {report.lastUpdated || report.date}
             </div>
+            {report.version && (
+              <div className="flex items-center">
+                <Info className="h-4 w-4 mr-1.5 text-gray-500" />
+                Version: {report.version}
+              </div>
+            )}
           </div>
-          <p className="mt-4 text-gray-700">{report.summary}</p>
+          <p className="mt-4 text-gray-700 leading-relaxed">{report.summary}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {report.topics.map((topic) => (
               <span 
                 key={topic}
-                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium"
               >
                 {topic}
               </span>
@@ -538,7 +408,175 @@ export default function ReportDetail() {
 
         {/* Report Content */}
         <div className="p-6">
-          {renderReportContent()}
+          {activeTab === 'overview' && report.content && (
+            <div className="space-y-6">
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <Info className="h-5 w-5 mr-2 text-teal-600" />
+                  Executive Summary
+                </h2>
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {report.content.executiveSummary}
+                  </p>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-teal-600" />
+                  Key Findings
+                </h2>
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <ul className="space-y-2">
+                    {report.content.keyFindings.map((finding, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <Check className="h-5 w-5 text-teal-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{finding}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <AlertTriangle className="h-5 w-5 mr-2 text-teal-600" />
+                  Risk Assessment
+                </h2>
+                <div className="space-y-3">
+                  {report.content.risks.map((risk, idx) => (
+                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold text-gray-800">{risk.name}</h3>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          risk.level === 'High' ? 'bg-red-100 text-red-700' :
+                          risk.level === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {risk.level} Risk
+                        </span>
+                      </div>
+                      <p className="text-gray-600 text-sm">{risk.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <BarChart className="h-5 w-5 mr-2 text-teal-600" /> 
+                  Data Visualizations
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {report.content.charts.map((chart, idx) => (
+                    <div key={idx} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="font-medium text-gray-700 text-sm">{chart.title}</h3>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <Download className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="p-4 h-52 bg-white flex items-center justify-center">
+                        {chart.type === 'bar' && <BarChart className="h-32 w-32 text-gray-300" />}
+                        {chart.type === 'line' && <TrendingUp className="h-32 w-32 text-gray-300" />}
+                        {chart.type === 'pie' && <PieChart className="h-32 w-32 text-gray-300" />}
+                        {chart.type === 'map' && <Map className="h-32 w-32 text-gray-300" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+          
+          {activeTab === 'details' && report.content && (
+            <div className="space-y-6">
+              {report.content.sections.map((section, idx) => (
+                <section key={idx}>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                    {section.title}
+                  </h2>
+                  <div className="bg-white border border-gray-200 rounded-lg p-5">
+                    <p className="text-gray-700 leading-relaxed">
+                      {section.content}
+                    </p>
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+          
+          {activeTab === 'recommendations' && report.content && (
+            <div className="space-y-6">
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-teal-600" />
+                  Strategic Recommendations
+                </h2>
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <ul className="space-y-3">
+                    {report.content.recommendations.map((recommendation, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <Check className="h-5 w-5 text-teal-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            </div>
+          )}
+          
+          {activeTab === 'entities' && report.content && (
+            <div className="space-y-6">
+              <section>
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <Building className="h-5 w-5 mr-2 text-teal-600" />
+                  Key Entities
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {report.content.entities.map((entity, idx) => (
+                    <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                      <div className="flex items-start">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mr-3 ${
+                          entity.type === 'Corporate' ? 'bg-blue-100 text-blue-700' :
+                          entity.type === 'Government Institution' ? 'bg-purple-100 text-purple-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>
+                          {entity.type === 'Corporate' ? 
+                            <Building className="h-5 w-5" /> :
+                          entity.type === 'Government Institution' ? 
+                            <Building className="h-5 w-5" /> :
+                            <User className="h-5 w-5" />
+                          }
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{entity.name}</h3>
+                          <p className="text-sm text-gray-500">{entity.type}</p>
+                          <p className="text-sm text-gray-600 mt-1">{entity.relevance}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 mt-4 flex items-center">
+                  <Info className="h-4 w-4 mr-1.5 text-gray-400" />
+                  Click on any entity to view its full profile and network connections.
+                </p>
+              </section>
+            </div>
+          )}
+          
+          {!report.content && (
+            <div className="text-center py-12">
+              <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Report content unavailable</h3>
+              <p className="text-gray-500">
+                Detailed content for this report is not available in preview mode.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -330,7 +330,7 @@ export default function ReportsPage() {
         <div className="flex space-x-2">
           <Link 
             href="/dashboard/report/new" 
-            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 flex items-center text-sm font-medium"
+            className="flex items-center bg-blue-600 text-white rounded-md py-2 px-3 text-sm hover:bg-blue-700"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Create New Report

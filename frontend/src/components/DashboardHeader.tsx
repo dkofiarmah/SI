@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Info, Shield, Lock } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 type DashboardHeaderProps = {
   title: string;
@@ -23,34 +23,23 @@ export default function DashboardHeader({
   classificationType = 'unclassified'
 }: DashboardHeaderProps) {
   
-  // Define classification banner color based on classification type
-  const getClassificationColor = () => {
-    switch(classificationType) {
-      case 'confidential': return 'bg-blue-700';
-      case 'secret': return 'bg-amber-600';
-      case 'top-secret': return 'bg-accent';
-      default: return 'bg-green-700';
-    }
-  };
-  
   return (
     <div className={`intel-header flex flex-col w-full ${
       sticky ? 'sticky top-0 z-20' : ''
     }`}>
-      {/* Classification banner */}
-      <div className={`classified-banner ${getClassificationColor()} w-full flex justify-center items-center py-1`}>
-        <Lock className="h-3 w-3 mr-1.5" />
-        <span>{classificationType.toUpperCase()}</span>
-      </div>
-      
-      <div className={`flex flex-wrap justify-between items-center p-4 gap-y-4 ${
-        bgColor === 'white' ? 'bg-white' : 'bg-primary'
-      }`}>
+      <div className="flex flex-wrap justify-between items-center p-4 gap-y-4 bg-white" style={{
+        background: '#14213d',
+        color: 'white',
+      }}>
         <div className="flex items-start gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-white font-headings tracking-tight">{title}</h1>
+            <h1 className="text-2xl font-bold font-headings tracking-tight text-primary" style={{
+              color: 'white',
+            }}>{title}</h1>
             {description && (
-              <p className="text-neutral-200 mt-1 text-sm">{description}</p>
+              <p className="mt-1 text-sm text-gray-600" style={{
+                color: '#c3c3c3',
+              }}>{description}</p>
             )}
           </div>
           {showInfoTip && infoTipContent && (
@@ -59,9 +48,11 @@ export default function DashboardHeader({
                 className="p-1 hover:bg-primary-light rounded-full transition-colors"
                 aria-label="Show information"
               >
-                <Info className="h-5 w-5 text-neutral-300" />
+                <Info className="h-5 w-5 text-primary" />
               </button>
-              <div className="hidden group-hover:block absolute left-full ml-2 top-0 bg-primary-dark text-white text-sm rounded-md p-2 w-64 z-20 shadow-lg border border-primary-light">
+              <div className="hidden group-hover:block absolute left-full ml-2 top-0 bg-primary-dark text-white text-sm rounded-md p-2 w-64 z-20 shadow-lg border border-primary-light" style={{
+                background: '#14213d',
+              }}>
                 {infoTipContent}
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, MapPin, Globe, PieChart, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, BarChart3, Globe, MapPin, PieChart } from 'lucide-react';
 
 export default function DashboardPreview() {
   return (
@@ -67,19 +67,19 @@ export default function DashboardPreview() {
             <div className="flex items-end justify-between h-24 px-2">
               <div className="flex flex-col items-center">
                 <div className="w-6 bg-blue-400 rounded-t h-10"></div>
-                <span className="text-xs mt-1">Q1</span>
+                <span className="text-xs mt-1 text-gray-600">Q1</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-6 bg-blue-500 rounded-t h-16"></div>
-                <span className="text-xs mt-1">Q2</span>
+                <span className="text-xs mt-1 text-gray-600">Q2</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-6 bg-blue-600 rounded-t h-8"></div>
-                <span className="text-xs mt-1">Q3</span>
+                <span className="text-xs mt-1 text-gray-600">Q3</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-6 bg-blue-700 rounded-t h-20"></div>
-                <span className="text-xs mt-1">Q4</span>
+                <span className="text-xs mt-1 text-gray-600">Q4</span>
               </div>
             </div>
           </div>
@@ -93,15 +93,15 @@ export default function DashboardPreview() {
             <div className="flex justify-between items-center px-4">
               <div className="flex flex-col items-center">
                 <div className="h-4 w-16 rounded-full bg-gradient-to-r from-red-500 to-green-500"></div>
-                <span className="text-xs mt-1">East Africa</span>
+                <span className="text-xs mt-1 text-gray-600">East Africa</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="h-4 w-16 rounded-full bg-gradient-to-r from-yellow-500 to-green-500"></div>
-                <span className="text-xs mt-1">West Africa</span>
+                <span className="text-xs mt-1 text-gray-600">West Africa</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="h-4 w-16 rounded-full bg-gradient-to-r from-amber-500 to-green-500"></div>
-                <span className="text-xs mt-1">North Africa</span>
+                <span className="text-xs mt-1 text-gray-600">North Africa</span>
               </div>
             </div>
           </div>

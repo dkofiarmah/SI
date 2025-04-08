@@ -4,17 +4,20 @@ import { Info } from 'lucide-react';
 type DashboardHeaderProps = {
   title: string;
   description?: string;
+  subtitle?: string;
   children?: ReactNode;
   showInfoTip?: boolean;
   infoTipContent?: string;
   bgColor?: 'white' | 'transparent';
   sticky?: boolean;
+  showDateRange?: boolean;
   classificationType?: 'unclassified' | 'confidential' | 'secret' | 'top-secret';
 };
 
 export default function DashboardHeader({
   title,
   description,
+  subtitle,
   children,
   showInfoTip = false,
   infoTipContent,
@@ -36,6 +39,11 @@ export default function DashboardHeader({
             <h1 className="text-2xl font-bold font-headings tracking-tight text-primary" style={{
               color: 'white',
             }}>{title}</h1>
+            {subtitle && (
+              <p className="mt-0.5 text-sm font-medium" style={{
+                color: '#e5e5e5',
+              }}>{subtitle}</p>
+            )}
             {description && (
               <p className="mt-1 text-sm text-gray-600" style={{
                 color: '#c3c3c3',

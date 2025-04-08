@@ -27,6 +27,13 @@ export type EntityType = 'person' | 'organization' | 'location';
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 export type ConnectionStrength = 'Strong' | 'Medium' | 'Weak';
 
+export interface KeyConnection {
+    name: string;
+    role: string;
+    strength: ConnectionStrength;
+    relationship: 'Professional' | 'Financial' | 'Institutional' | 'Governmental' | 'Other';
+}
+
 export interface Entity {
     id: string;
     name: string;
@@ -41,7 +48,7 @@ export interface Entity {
 export interface EntityDetail extends Entity {
     bio?: string;
     recentActivities: Activity[];
-    keyConnections: Connection[];
+    keyConnections: KeyConnection[];
     associatedLocations?: string[];
     riskFactors?: string[];
 }

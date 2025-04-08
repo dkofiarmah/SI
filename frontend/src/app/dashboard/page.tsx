@@ -1,647 +1,349 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { 
-  Filter, ChevronDown, TrendingUp, AlertCircle, AlertTriangle,
-  Building, BarChart, Map, User, Upload, Database, Globe, FileSpreadsheet,
-  Waves, Link, Settings as SettingsIcon, Save, Clock, ExternalLink, FileText
+  BarChart4, Users, Building2, MapPin, 
+  Calendar, Flag, Newspaper, TrendingUp, 
+  AlertTriangle, BrainCircuit, Search,
+  Lightbulb, Star, Eye, ArrowRight
 } from 'lucide-react';
+import Link from 'next/link';
 import DashboardHeader from '@/components/DashboardHeader';
+import RiskForecast from '@/components/RiskForecast';
+import DataSourceSelector from '@/components/DataSourceSelector';
+import EnhancedDashboardCard from '@/components/EnhancedDashboardCard';
 import StabilityMap from '@/components/StabilityMap';
-import EconomicTrends from '@/components/EconomicTrends';
-import ThreatIntelligenceHeatmap from '@/components/ThreatIntelligenceHeatmap';
+import TrendAnalysis from '@/components/TrendAnalysis';
 import RegionalSentimentAnalysis from '@/components/RegionalSentimentAnalysis';
-import DashboardSettings, { DashboardWidget } from '@/components/DashboardSettings';
-import { 
-  regions, countriesByRegion, allCountries, mockReports,
-  dataConnectorTypes, mockAlerts
-} from '@/data/mock/data';
-import DraggableWrapper from '@/components/DraggableWrapper';
-
-// Default dashboard widgets configuration
-const defaultWidgets: DashboardWidget[] = [
-  {
-    id: 'stability-map',
-    name: 'Stability Index Map',
-    enabled: true,
-    description: 'Shows stability ratings across regions with risk assessment'
-  },
-  {
-    id: 'economic-trends',
-    name: 'Economic Trends',
-    enabled: true,
-    description: 'Displays economic indicators and financial trends over time'
-  },
-  {
-    id: 'threat-intelligence',
-    name: 'Threat Intelligence Heatmap',
-    enabled: true,
-    description: 'Visual representation of threats by type and severity'
-  },
-  {
-    id: 'sentiment-analysis',
-    name: 'Regional Sentiment Analysis',
-    enabled: true,
-    description: 'Tracks public sentiment from various data sources'
-  },
-  {
-    id: 'risk-forecast',
-    name: 'Risk Forecast',
-    enabled: true,
-    description: 'Upcoming risk alerts and forecasted issues'
-  },
-  {
-    id: 'key-entities',
-    name: 'Key Entities',
-    enabled: true,
-    description: 'Important people and organizations in the region'
-  },
-  {
-    id: 'reports-table',
-    name: 'Latest Reports',
-    enabled: true,
-    description: 'Recent intelligence reports and findings'
-  }
-];
 
 export default function DashboardPage() {
-  // State for geographic scope filters
-  const [selectedRegion, setSelectedRegion] = useState('All Regions');
-  const [selectedCountry, setSelectedCountry] = useState('');
-  
-  // Modal states
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  
-  // Dashboard configuration
-  const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
-  const [timeframe, setTimeframe] = useState('30');
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Advanced filters
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState(timeframe);
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedRiskLevels, setSelectedRiskLevels] = useState<string[]>([]);
-  
-  // Topics for filtering (would typically come from an API)
-  const availableTopics = ['Economic', 'Political', 'Security', 'Infrastructure', 'Social', 'Environmental'];
-  const riskLevels = ['High', 'Medium', 'Low'];
+  const { user, isLoaded } = useUser();
+  const [showWelcomeGuide, setShowWelcomeGuide] = useState(true);
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  // Get available countries based on selected region
-  const availableCountries = selectedRegion && selectedRegion !== 'All Regions' 
-    ? countriesByRegion[selectedRegion as keyof typeof countriesByRegion] || [] 
-    : allCountries;
-
-  // Load saved dashboard configuration from localStorage on initial load
-  useEffect(() => {
-    setIsLoading(true);
-    
-    // Try to load saved configuration from localStorage
-    try {
-      const savedWidgets = localStorage.getItem('dashboardWidgets');
-      const savedTimeframe = localStorage.getItem('dashboardTimeframe');
-      
-      if (savedWidgets) {
-        setWidgets(JSON.parse(savedWidgets));
-      } else {
-        setWidgets(defaultWidgets);
-      }
-      
-      if (savedTimeframe) {
-        setTimeframe(savedTimeframe);
-        setSelectedTimeframe(savedTimeframe);
-      }
-    } catch (error) {
-      console.error('Error loading dashboard configuration:', error);
-      setWidgets(defaultWidgets);
+  // Sample quick insights data - in production this would come from an API
+  const quickInsights = [
+    {
+      id: 1,
+      title: "Emerging Risk: Infrastructure Project Delays",
+      description: "Three major infrastructure projects in Ghana are facing significant delays due to supply chain disruptions.",
+      entityType: "Events",
+      impact: "high",
+      date: "2 hours ago"
+    },
+    {
+      id: 2,
+      title: "New Connection Identified",
+      description: "Previously unknown connection between Ghana National Petroleum Corp and East African energy startups revealed.",
+      entityType: "Organizations",
+      impact: "medium",
+      date: "Yesterday"
+    },
+    {
+      id: 3,
+      title: "Stability Change: Western Region",
+      description: "Stability index for Ghana's Western Region has improved by 12% over the last month.",
+      entityType: "Places",
+      impact: "positive",
+      date: "3 days ago"
     }
-    
-    // Simulate loading of dashboard data
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
-  }, []);
-  
-  // Save dashboard configuration when it changes
-  const saveWidgetConfiguration = (updatedWidgets: DashboardWidget[]) => {
-    setWidgets(updatedWidgets);
-    localStorage.setItem('dashboardWidgets', JSON.stringify(updatedWidgets));
-  };
-  
-  // Save timeframe when it changes
-  const saveTimeframe = (newTimeframe: string) => {
-    setTimeframe(newTimeframe);
-    setSelectedTimeframe(newTimeframe);
-    localStorage.setItem('dashboardTimeframe', newTimeframe);
-  };
-  
-  // Toggle for advanced filters
-  const toggleAdvancedFilters = () => {
-    setShowAdvancedFilters(!showAdvancedFilters);
-  };
-  
-  // Toggle a topic selection
-  const toggleTopic = (topic: string) => {
-    setSelectedTopics(prev => 
-      prev.includes(topic) 
-        ? prev.filter(t => t !== topic) 
-        : [...prev, topic]
-    );
-  };
-  
-  // Toggle a risk level selection
-  const toggleRiskLevel = (level: string) => {
-    setSelectedRiskLevels(prev => 
-      prev.includes(level) 
-        ? prev.filter(l => l !== level) 
-        : [...prev, level]
-    );
-  };
-  
-  // Apply filters
-  const applyFilters = () => {
-    saveTimeframe(selectedTimeframe);
-    setShowAdvancedFilters(false);
-  };
-  
-  // Reset filters
-  const resetFilters = () => {
-    setSelectedTimeframe('30');
-    setSelectedTopics([]);
-    setSelectedRiskLevels([]);
-    saveTimeframe('30');
-    setShowAdvancedFilters(false);
-  };
+  ];
 
-  // Data Import Modal (keeping this the same as before)
-  const DataImportModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-[600px] max-h-[80vh] overflow-y-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold">Import Data</h3>
+  // Frequently tracked entities - would come from user preferences in production
+  const trackedEntities = [
+    { id: 1, name: "Ghana National Petroleum Corporation", type: "organization" },
+    { id: 2, name: "Accra Tech Ecosystem", type: "topic" },
+    { id: 3, name: "Western Region", type: "place" },
+    { id: 4, name: "Jean Mensa", type: "person" }
+  ];
+
+  if (!isLoaded) {
+    return <div className="h-full w-full flex items-center justify-center">
+      <div className="h-12 w-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+    </div>;
+  }
+  
+  return (
+    <div className="min-h-full p-6 pb-20">
+      <DashboardHeader 
+        title="African Intelligence Platform" 
+        description="Transform fragmented data into actionable insights across Ghana and Africa" 
+      />
+
+      {/* Welcome Message & Value Proposition */}
+      {showWelcomeGuide && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-100 shadow-sm relative">
           <button 
-            onClick={() => setShowImportModal(false)}
-            className="p-1 hover:bg-gray-100 rounded-full"
+            onClick={() => setShowWelcomeGuide(false)}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+            aria-label="Dismiss welcome message"
           >
-            <span className="sr-only">Close</span>
             ×
           </button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-100 rounded-md p-4">
-            <h4 className="font-medium text-blue-800 mb-2">Connect Your Data Sources</h4>
-            <p className="text-sm text-blue-600">
-              Import your own data to combine with our intelligence for richer insights.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {dataConnectorTypes.map((connector) => (
-              <button
-                key={connector.id}
-                className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
-              >
-                {connector.id === 'csv' && <FileSpreadsheet className="h-8 w-8 text-blue-600 mb-2" />}
-                {connector.id === 'api' && <Link className="h-8 w-8 text-purple-600 mb-2" />}
-                {connector.id === 'database' && <Database className="h-8 w-8 text-green-600 mb-2" />}
-                {connector.id === 'streaming' && <Waves className="h-8 w-8 text-orange-600 mb-2" />}
-                {connector.id === 'scraping' && <Globe className="h-8 w-8 text-indigo-600 mb-2" />}
-                <h5 className="font-medium">{connector.name}</h5>
-                <p className="text-xs text-gray-500 mt-1">{connector.description}</p>
-                <span className="text-xs mt-2 px-2 py-0.5 rounded-full bg-gray-100">
-                  {connector.setupComplexity} Setup
-                </span>
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <h4 className="font-medium mb-2">Recently Connected Sources</h4>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                <span>Market Data API</span>
-                <span className="text-green-600">Active</span>
+          <div className="flex items-start space-x-4">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <BrainCircuit className="h-6 w-6 text-blue-700" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Welcome to Savannah Intelligence</h2>
+              <p className="text-gray-600 mb-4">
+                <span className="font-medium">Make smarter decisions with comprehensive African intelligence</span>. 
+                We connect the dots between people, organizations, places, and events to reveal hidden insights and 
+                help you stay ahead of emerging trends and risks across Africa.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-blue-100">
+                  <h3 className="font-medium text-blue-800 mb-1 flex items-center">
+                    <Users className="h-4 w-4 mr-1.5" /> Entity Intelligence
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    360° profiles with key relationships, risks, and opportunities at a glance.
+                  </p>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-blue-100">
+                  <h3 className="font-medium text-blue-800 mb-1 flex items-center">
+                    <Newspaper className="h-4 w-4 mr-1.5" /> Real-time Analysis
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    AI-powered news monitoring and analysis that finds signals in the noise.
+                  </p>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-blue-100">
+                  <h3 className="font-medium text-blue-800 mb-1 flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-1.5" /> Risk Forecasting
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Anticipate changes with predictive analytics and scenario planning.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                <span>Regional News Feed</span>
-                <span className="text-green-600">Active</span>
+              <div className="mt-4 flex items-center">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 flex items-center">
+                  Start exploring entities <Search className="ml-1.5 h-4 w-4" />
+                </button>
+                <a href="#" className="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
+                  Watch 2-min tutorial <Calendar className="ml-1.5 h-4 w-4" />
+                </a>
               </div>
             </div>
           </div>
         </div>
+      )}
 
-        <div className="mt-6 flex justify-end space-x-3">
-          <button 
-            onClick={() => setShowImportModal(false)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-            Start Import
-          </button>
+      {/* Current Date and Critical Alerts Summary */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+        <div>
+          <p className="text-sm text-gray-500">{currentDate}</p>
+          <h2 className="text-lg font-medium text-gray-800">
+            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, 
+            {user?.firstName ? ` ${user.firstName}` : ''}
+          </h2>
+        </div>
+        <div className="flex items-center space-x-1 bg-red-50 px-3 py-1.5 rounded-full border border-red-100">
+          <AlertTriangle className="h-4 w-4 text-red-500" />
+          <span className="text-sm font-medium text-red-600">3 new critical alerts</span>
+          <Link href="/dashboard/alerts" className="text-xs bg-red-100 hover:bg-red-200 text-red-800 px-2 py-0.5 rounded-full ml-2">
+            View all
+          </Link>
         </div>
       </div>
-    </div>
-  );
 
-  // Advanced Filters Panel
-  const AdvancedFiltersPanel = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-medium text-gray-800">Advanced Filters</h3>
-        <button
-          onClick={toggleAdvancedFilters}
-          className="text-sm text-gray-500 hover:text-gray-700"
-        >
-          Close
-        </button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Timeframe Selection */}
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <Clock className="h-4 w-4 mr-1.5 text-gray-500" />
-            Data Timeframe
-          </h4>
-          <div className="w-full">
-            <select
-              value={selectedTimeframe}
-              onChange={(e) => setSelectedTimeframe(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-            >
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90">Last 90 days</option>
-              <option value="180">Last 6 months</option>
-              <option value="365">Last year</option>
-            </select>
+      {/* Quick Insights Section - NEW */}
+      <div className="mb-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <Lightbulb className="h-5 w-5 text-amber-500 mr-2" />
+            <h3 className="font-medium text-gray-800">Quick Insights</h3>
           </div>
+          <Link href="/dashboard/alerts" className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+            View all insights <ArrowRight className="ml-1 h-3 w-3" />
+          </Link>
         </div>
-        
-        {/* Topics Filter */}
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Topics</h4>
-          <div className="flex flex-wrap gap-2">
-            {availableTopics.map(topic => (
-              <button
-                key={topic}
-                onClick={() => toggleTopic(topic)}
-                className={`text-xs px-2 py-1 rounded-full ${
-                  selectedTopics.includes(topic)
-                    ? 'bg-blue-100 text-blue-700 border-blue-300'
-                    : 'bg-gray-100 text-gray-700 border-gray-200'
-                } border`}
-              >
-                {topic}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Risk Level Filter */}
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Risk Level</h4>
-          <div className="space-y-1">
-            {riskLevels.map(level => (
-              <label key={level} className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={selectedRiskLevels.includes(level)}
-                  onChange={() => toggleRiskLevel(level)}
-                  className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                />
-                <span className={`ml-2 text-sm ${
-                  level === 'High' ? 'text-red-700' :
-                  level === 'Medium' ? 'text-yellow-700' :
-                  'text-green-700'
-                }`}>
-                  {level} Risk
-                </span>
-              </label>
+        <div className="p-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {quickInsights.map(insight => (
+              <div key={insight.id} className={`p-4 rounded-lg border ${
+                insight.impact === 'high' ? 'border-red-100 bg-red-50' : 
+                insight.impact === 'medium' ? 'border-amber-100 bg-amber-50' : 
+                'border-green-100 bg-green-50'
+              }`}>
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white border border-gray-200">
+                    {insight.entityType}
+                  </span>
+                  <span className="text-xs text-gray-500">{insight.date}</span>
+                </div>
+                <h4 className="font-medium text-gray-800 mb-1">{insight.title}</h4>
+                <p className="text-sm text-gray-600 mb-3">{insight.description}</p>
+                <button className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                  View details <ArrowRight className="ml-1 h-3 w-3" />
+                </button>
+              </div>
             ))}
           </div>
         </div>
       </div>
-      
-      <div className="flex justify-end mt-6 space-x-3">
-        <button
-          onClick={resetFilters}
-          className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
-        >
-          Reset
-        </button>
-        <button
-          onClick={applyFilters}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 flex items-center"
-        >
-          <Save className="h-4 w-4 mr-1.5" />
-          Apply Filters
-        </button>
-      </div>
-    </div>
-  );
 
-  return (
-    <div className="p-6">
-      <DashboardHeader
-        title="Intelligence Dashboard"
-        description={`Displaying insights for: ${selectedCountry || selectedRegion}`}
-        showInfoTip
-        infoTipContent="This dashboard combines real-time data analysis with historical trends to provide comprehensive intelligence insights."
+      {/* Entities You Track - NEW */}
+      <div className="mb-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-indigo-100 px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center">
+            <Star className="h-5 w-5 text-indigo-500 mr-2" />
+            <h3 className="font-medium text-gray-800">Entities You Track</h3>
+          </div>
+          <button className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center">
+            Manage tracked entities <ArrowRight className="ml-1 h-3 w-3" />
+          </button>
+        </div>
+        <div className="p-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {trackedEntities.map(entity => (
+              <div key={entity.id} className="p-3 rounded-lg border border-gray-200 hover:border-indigo-200 bg-white hover:bg-indigo-50 transition-colors cursor-pointer">
+                <div className="flex items-center mb-2">
+                  {entity.type === 'organization' && <Building2 className="h-4 w-4 text-indigo-500 mr-1.5" />}
+                  {entity.type === 'person' && <Users className="h-4 w-4 text-indigo-500 mr-1.5" />}
+                  {entity.type === 'place' && <MapPin className="h-4 w-4 text-indigo-500 mr-1.5" />}
+                  {entity.type === 'topic' && <Newspaper className="h-4 w-4 text-indigo-500 mr-1.5" />}
+                  <span className="text-xs text-gray-500 capitalize">{entity.type}</span>
+                </div>
+                <h4 className="font-medium text-gray-800 text-sm">{entity.name}</h4>
+                <div className="flex items-center mt-2 text-xs text-indigo-600">
+                  <Eye className="h-3 w-3 mr-1" /> View profile
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Search and Entity Access */}
+      <div className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-gray-200">
+        <h2 className="text-lg font-medium text-gray-800 mb-4">Quick Entity Access</h2>
+        <div className="relative w-full mb-5">
+          <input
+            type="text"
+            placeholder="Search for any person, organization, place, event, or country..."
+            className="w-full px-4 py-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+          />
+          <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+          <Link href="/dashboard/entity/people" className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition duration-150">
+            <Users className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-700">Key People</span>
+          </Link>
+          <Link href="/dashboard/entity/organizations" className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition duration-150">
+            <Building2 className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-700">Organizations</span>
+          </Link>
+          <Link href="/dashboard/entity/places" className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition duration-150">
+            <MapPin className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-700">Places</span>
+          </Link>
+          <Link href="/dashboard/entity/events" className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition duration-150">
+            <Calendar className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-700">Events</span>
+          </Link>
+          <Link href="/dashboard/entity/countries" className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition duration-150">
+            <Flag className="h-6 w-6 text-blue-600 mb-2" />
+            <span className="text-sm font-medium text-gray-700">Countries</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Insights & Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Risk Forecast */}
+        <EnhancedDashboardCard
+          title="Risk Forecast"
+          icon={<AlertTriangle className="h-5 w-5 text-orange-500" />}
+        >
+          <div className="text-gray-500 text-sm mb-3">Next 30 days</div>
+          <RiskForecast />
+          <div className="mt-4">
+            <Link href="/dashboard/trends/risk" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+              View detailed analysis <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </EnhancedDashboardCard>
+        
+        {/* Stability Map */}
+        <EnhancedDashboardCard
+          title="Stability Index"
+          icon={<BarChart4 className="h-5 w-5 text-green-600" />}
+          className="lg:col-span-2"
+        >
+          <div className="text-gray-500 text-sm mb-3">Regional overview</div>
+          <StabilityMap />
+          <div className="mt-4">
+            <Link href="/dashboard/geospatial" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+              Explore geospatial data <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </EnhancedDashboardCard>
+      </div>
+
+      {/* Trend Analysis Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Trending Topics */}
+        <EnhancedDashboardCard
+          title="Topic Analysis"
+          icon={<TrendingUp className="h-5 w-5 text-blue-600" />}
+          className="lg:col-span-2"
+        >
+          <div className="text-gray-500 text-sm mb-3">Most discussed themes</div>
+          <TrendAnalysis 
+            selectedRegion="West Africa"
+            timeframe="30"
+            userType="general"
+          />
+          <div className="mt-4">
+            <Link href="/dashboard/trends/topics" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+              View topic trends <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </EnhancedDashboardCard>
+        
+        {/* Regional Sentiment */}
+        <EnhancedDashboardCard
+          title="Regional Sentiment"
+          icon={<Newspaper className="h-5 w-5 text-purple-600" />}
+        >
+          <div className="text-gray-500 text-sm mb-3">News and social media</div>
+          <RegionalSentimentAnalysis 
+            selectedRegion="West Africa"
+            timeframe="60"
+          />
+          <div className="mt-4">
+            <Link href="/dashboard/trends/sentiment" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+              Full sentiment analysis <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+        </EnhancedDashboardCard>
+      </div>
+
+      {/* Data Sources */}
+      <EnhancedDashboardCard
+        title="Active Data Sources"
+        icon={<BrainCircuit className="h-5 w-5 text-indigo-600" />}
       >
-        {/* Geographic Scope Filters */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-          <div className="relative">
-            <select
-              value={selectedRegion}
-              onChange={(e) => {
-                setSelectedRegion(e.target.value);
-                setSelectedCountry('');
-              }}
-              className="bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-            >
-              {regions.map(region => (
-                <option key={region} value={region}>{region}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-          </div>
-
-          <div className="relative">
-            <select
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-              disabled={selectedRegion === 'All Regions'}
-              className="bg-white border border-gray-300 rounded-md py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">All Countries in Region</option>
-              {availableCountries.map(country => (
-                <option key={country} value={country}>{country}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-          </div>
-
-          <button 
-            onClick={() => setShowImportModal(true)}
-            className="flex items-center bg-blue-600 text-white rounded-md py-2 px-3 text-sm hover:bg-blue-700"
-          >
-            <Upload className="h-4 w-4 mr-1.5" /> Import Data
-          </button>
-
-          <button 
-            onClick={toggleAdvancedFilters}
-            className="flex items-center bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-700 hover:bg-gray-50"
-          >
-            <Filter className="h-4 w-4 mr-1.5 text-gray-500" /> 
-            {showAdvancedFilters ? 'Hide Filters' : 'More Filters'}
-          </button>
-          
-          <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="flex items-center bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-700 hover:bg-gray-50"
-          >
-            <SettingsIcon className="h-4 w-4 mr-1.5 text-gray-500" /> Dashboard Settings
-          </button>
-        </div>
-      </DashboardHeader>
-      
-      {/* Advanced Filters Panel (conditionally rendered) */}
-      {showAdvancedFilters && <AdvancedFiltersPanel />}
-
-      {isLoading ? (
-        <div className="flex items-center justify-center h-96">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-600">Loading dashboard data...</p>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* First Row - 2/3 + 1/3 split */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            {/* Left Column - 2/3 width */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Stability Map (conditional rendering based on widgets configuration) */}
-              {widgets.find(w => w.id === 'stability-map')?.enabled && (
-                <StabilityMap 
-                  selectedRegion={selectedRegion} 
-                  selectedCountry={selectedCountry} 
-                />
-              )}
-              
-              {/* Economic Trends (conditional rendering) */}
-              {widgets.find(w => w.id === 'economic-trends')?.enabled && (
-                <EconomicTrends 
-                  selectedRegion={selectedRegion} 
-                  selectedCountry={selectedCountry} 
-                />
-              )}
-              
-              {/* Threat Intelligence Heatmap (conditional rendering) */}
-              {widgets.find(w => w.id === 'threat-intelligence')?.enabled && (
-                <ThreatIntelligenceHeatmap 
-                  selectedRegion={selectedRegion} 
-                  selectedCountry={selectedCountry} 
-                  timeframe={timeframe}
-                />
-              )}
-              
-              {/* Regional Sentiment Analysis (conditional rendering) */}
-              {widgets.find(w => w.id === 'sentiment-analysis')?.enabled && (
-                <RegionalSentimentAnalysis 
-                  selectedRegion={selectedRegion} 
-                  selectedCountry={selectedCountry} 
-                  timeframe={timeframe}
-                />
-              )}
-            </div>
-
-            {/* Right Column - 1/3 width */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Risk Forecast (conditional rendering) */}
-              {widgets.find(w => w.id === 'risk-forecast')?.enabled && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h2 className="font-bold text-lg text-gray-800 flex items-center">
-                      <TrendingUp className="h-5 w-5 mr-2 text-purple-600"/>Risk Forecast
-                    </h2>
-                    <a href="/dashboard/scenario" className="text-blue-600 text-sm font-medium hover:underline">
-                      Scenario Planning
-                    </a>
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    {mockAlerts.map((alert) => (
-                      <div 
-                        key={alert.id}
-                        className={`flex items-center justify-between p-2 ${
-                          alert.severity === 'high' ? 'bg-red-50' :
-                          alert.severity === 'medium' ? 'bg-yellow-50' :
-                          'bg-green-50'
-                        } rounded`}
-                      >
-                        <span>{alert.title}</span>
-                        <span className={`font-medium ${
-                          alert.severity === 'high' ? 'text-red-700' :
-                          alert.severity === 'medium' ? 'text-yellow-700' :
-                          'text-green-700'
-                        }`}>
-                          {alert.timeframe}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Key Stakeholders & Entities (improved from Key Entities) */}
-              {widgets.find(w => w.id === 'key-entities')?.enabled && (
-                <DraggableWrapper>
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                    <div className="flex justify-between items-center mb-4 drag-handle cursor-move">
-                      <h2 className="font-bold text-lg text-gray-800 flex items-center">
-                        <Building className="h-5 w-5 mr-2 text-indigo-600"/>Key Stakeholders
-                      </h2>
-                      <a href="/dashboard/network" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
-                        <ExternalLink className="h-4 w-4 mr-1.5" />
-                        Network View
-                      </a>
-                    </div>
-                    
-                    {/* Tab Navigation for Entity Types */}
-                    <div className="flex border-b border-gray-200 mb-3">
-                      <button className="pb-2 px-4 border-b-2 border-blue-600 text-blue-600 text-sm font-medium">People</button>
-                      <button className="pb-2 px-4 text-gray-500 hover:text-gray-700 text-sm">Organizations</button>
-                      <button className="pb-2 px-4 text-gray-500 hover:text-gray-700 text-sm">Companies</button>
-                    </div>
-                    
-                    <ul className="space-y-3">
-                      {[
-                        { name: "Ahmed Hassan", role: "Egyptian Finance Minister", type: "person", influence: 8.5, risk: "Low", connections: 37 },
-                        { name: "Nala Okoro", role: "Nigerian Energy Executive", type: "person", influence: 7.8, risk: "Medium", connections: 22 },
-                        { name: "Mahmoud Al-Faisal", role: "Regional Diplomat", type: "person", influence: 9.1, risk: "Low", connections: 51 }
-                      ].map((entity, index) => (
-                        <li 
-                          key={index} 
-                          className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer border border-gray-100"
-                        >
-                          <div className={`h-10 w-10 rounded-full mr-3 flex items-center justify-center text-white font-semibold text-xs ${
-                            entity.type === 'person' ? 'bg-indigo-500' : 'bg-purple-500'
-                          }`}>
-                            {entity.type === 'person' ? (
-                              <User className="h-5 w-5"/>
-                            ) : (
-                              <Building className="h-5 w-5"/>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <p className="font-medium text-gray-800">{entity.name}</p>
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                entity.risk === 'Low' ? 'bg-green-100 text-green-800' :
-                                entity.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
-                                {entity.risk} Risk
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-600">{entity.role}</p>
-                            <div className="flex mt-1 text-xs text-gray-500">
-                              <span className="flex items-center mr-3">
-                                <BarChart className="h-3 w-3 mr-1" />
-                                Influence: {entity.influence}
-                              </span>
-                              <span className="flex items-center">
-                                <Link className="h-3 w-3 mr-1" />
-                                {entity.connections} Connections
-                              </span>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                      <a href="/dashboard/network" className="text-sm text-blue-600 hover:underline mt-2 flex items-center justify-center py-2 bg-blue-50 rounded-md">
-                        View All Stakeholders
-                      </a>
-                    </ul>
-                  </div>
-                </DraggableWrapper>
-              )}
-              
-              {/* Latest Intelligence Reports (moved from below) */}
-              {widgets.find(w => w.id === 'reports-table')?.enabled && (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-bold text-lg text-gray-800 flex items-center">
-                      <FileText className="h-5 w-5 mr-2 text-emerald-600"/>Latest Reports
-                    </h2>
-                    <a href="/dashboard/reports" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
-                      <ExternalLink className="h-4 w-4 mr-1.5" />
-                      Browse All
-                    </a>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {mockReports.slice(0, 3).map((report) => {
-                      const confColorClasses: Record<string, string> = {
-                        green: 'bg-green-100 text-green-800',
-                        yellow: 'bg-yellow-100 text-yellow-800',
-                        red: 'bg-red-100 text-red-800'
-                      };
-                      
-                      return (
-                        <div key={report.id} className="p-3 border border-gray-100 rounded-lg hover:border-blue-200 hover:bg-blue-50 transition-colors cursor-pointer">
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-medium text-gray-800">{report.title}</h3>
-                            <span className={`ml-2 px-2 py-0.5 ${confColorClasses[report.confColor]} rounded-full text-xs font-medium shrink-0`}>
-                              {report.confidence}
-                            </span>
-                          </div>
-                          <div className="mt-1 flex items-center text-xs text-gray-500">
-                            <Globe className="h-3 w-3 mr-1" />
-                            <span>{report.region}</span>
-                            <span className="mx-1.5">•</span>
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>{report.date}</span>
-                          </div>
-                          <p className="mt-2 text-xs text-gray-600 line-clamp-2">{report.summary}</p>
-                          <div className="mt-2 flex justify-end">
-                            <a href={`/dashboard/report/${report.id}`} className="text-blue-600 hover:text-blue-800 text-xs flex items-center">
-                              View Report
-                              <ChevronDown className="h-3 w-3 ml-1 rotate-270" />
-                            </a>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <a href="/dashboard/reports" className="block text-center py-2 text-sm text-blue-600 hover:underline">
-                      View All Reports
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Data Import Modal */}
-      {showImportModal && <DataImportModal />}
-      
-      {/* Dashboard Settings Modal */}
-      {showSettingsModal && (
-        <DashboardSettings
-          isOpen={showSettingsModal}
-          onClose={() => setShowSettingsModal(false)}
-          widgets={widgets}
-          onSave={saveWidgetConfiguration}
-          timeframe={timeframe}
-          onTimeframeChange={saveTimeframe}
+        <div className="text-gray-500 text-sm mb-3">Configure your intelligence feeds</div>
+        <DataSourceSelector 
+          selectedSources={[]}
+          onChange={(sources) => console.log('Selected sources changed:', sources)}
         />
-      )}
+        <div className="mt-4">
+          <Link href="/dashboard/data-sources" className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center">
+            Manage data sources <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+        </div>
+      </EnhancedDashboardCard>
     </div>
   );
 }

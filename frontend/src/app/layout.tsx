@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
+import LoadingProvider from "@/providers/LoadingProvider";
 
 // Initialize mapboxgl token
 import mapboxgl from "mapbox-gl";
@@ -21,9 +23,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-100 min-h-screen text-gray-900`}>
-        {children}
-      </body>
+      <head />
+      <ClerkProvider>
+        <body className={`${inter.className} bg-gray-100 min-h-screen text-gray-900`}>
+          <LoadingProvider>
+            {children}
+          </LoadingProvider>
+        </body>
+      </ClerkProvider>
     </html>
   );
 }

@@ -7,9 +7,14 @@ import {
   Sliders, Layers, Search, PlusCircle,
   MinusCircle, BarChart2, FileText, 
   ExternalLink, AlertCircle, Database,
-  ArrowUp, ArrowDown, ArrowRight
+  ArrowUp, ArrowDown, ArrowRight, Info,
+  Lock, Shield, Target
 } from 'lucide-react';
 import EnhancedDashboardCard from './EnhancedDashboardCard';
+import DataSourceSelector from './DataSourceSelector';
+import DataSourceInfoPanel from './DataSourceInfoPanel';
+import { getRecommendedDataSources } from '@/lib/utils/dataSources';
+import { DataSource, DataSourceType, DataSourceCategory, DataUpdateFrequency } from '@/types/dataSource';
 
 // Initialize Mapbox access token from environment variable
 if (!mapboxgl.accessToken) {
@@ -19,6 +24,8 @@ if (!mapboxgl.accessToken) {
 interface StabilityMapProps {
   selectedRegion?: string;
   selectedCountry?: string;
+  enableDataSourceSelection?: boolean;
+  classificationType?: 'unclassified' | 'confidential' | 'secret' | 'top-secret';
 }
 
 type RegionStability = {
@@ -75,7 +82,9 @@ const defaultZoom = 2.8;
 
 export default function StabilityMap({ 
   selectedRegion = 'All Regions', 
-  selectedCountry = '' 
+  selectedCountry = '',
+  enableDataSourceSelection = false,
+  classificationType = 'unclassified'
 }: StabilityMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -92,28 +101,83 @@ export default function StabilityMap({
   const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
   const [showDataSources, setShowDataSources] = useState(false);
   
+  // Add state for data sources
+  const [selectedDataSources, setSelectedDataSources] = useState<string[]>([
+    'savannah-core', 'economic-indicators', 'news-aggregation'
+  ]);
+  const [showDataSourceSelector, setShowDataSourceSelector] = useState(false);
+  const [showDataSourceInfo, setShowDataSourceInfo] = useState(false);
+  
   // Data source information
   const dataSources = [
     {
+      id: 'world-bank',
       name: 'World Bank Indicators',
+      type: 'economic' as DataSourceType,
+      category: 'external' as DataSourceCategory,
+      description: 'Economic indicators and development data from the World Bank',
       reliability: 92,
       lastUpdated: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
-      url: 'https://data.worldbank.org/'
+      updateFrequency: 'monthly' as DataUpdateFrequency,
+      coverage: {
+        timespan: {
+          start: new Date(2010, 0, 1),
+          end: "present" as "present"
+        }
+      },
+      url: 'https://data.worldbank.org/',
+      available: true
     },
     {
+      id: 'press-analysis',
       name: 'Regional Press Analysis',
+      type: 'news' as DataSourceType,
+      category: 'core' as DataSourceCategory,
+      description: 'Analysis of regional news sources and publications',
       reliability: 78,
       lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      updateFrequency: 'daily' as DataUpdateFrequency,
+      coverage: {
+        timespan: {
+          start: new Date(2020, 0, 1),
+          end: "present" as "present"
+        }
+      },
+      available: true
     },
     {
+      id: 'gov-reports',
       name: 'Local Government Reports',
+      type: 'government' as DataSourceType,
+      category: 'partner' as DataSourceCategory,
+      description: 'Official reports from local government agencies',
       reliability: 85,
       lastUpdated: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      updateFrequency: 'weekly' as DataUpdateFrequency,
+      coverage: {
+        timespan: {
+          start: new Date(2018, 0, 1),
+          end: "present" as "present"
+        }
+      },
+      available: true
     },
     {
+      id: 'intel-network',
       name: 'Intelligence Network Data',
+      type: 'intelligence' as DataSourceType,
+      category: 'premium' as DataSourceCategory,
+      description: 'Data from specialized intelligence networks and field reports',
       reliability: 88,
       lastUpdated: new Date(), // Today
+      updateFrequency: 'realtime' as DataUpdateFrequency,
+      coverage: {
+        timespan: {
+          start: new Date(2022, 0, 1),
+          end: "present" as "present"
+        }
+      },
+      available: true
     }
   ];
   
@@ -238,6 +302,26 @@ export default function StabilityMap({
     }, 1500);
   }, [selectedRegion, selectedCountry]);
   
+  // Function to handle data source change
+  const handleDataSourceChange = (sourceIds: string[]) => {
+    setSelectedDataSources(sourceIds);
+    // In a real implementation, you would reload the data based on the selected sources
+    
+    // For demonstration, let's toggle the loading state to simulate data refresh
+    setIsLoading(true);
+    setTimeout(() => {
+      fetchStabilityData();
+    }, 1000);
+  };
+  
+  // Function to get recommended data sources
+  const getRecommendedSourcesForCurrentView = () => {
+    return getRecommendedDataSources(
+      selectedRegion === 'All Regions' ? 'East Africa' : selectedRegion, 
+      'comprehensive'
+    ).map(source => source.id);
+  };
+  
   // Initialize the map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -339,12 +423,15 @@ export default function StabilityMap({
     if (!mapRef.current) return;
     
     const updateMapStyle = () => {
-      // Update heatmap visibility
-      mapRef.current?.setPaintProperty(
-        'stability-heat',
-        'heatmap-opacity',
-        viewMode === 'heat' ? 0.8 : 0
-      );
+      // Check if the map style is loaded and the layer exists before trying to update it
+      if (mapRef.current && mapRef.current.isStyleLoaded() && mapRef.current.getLayer('stability-heat')) {
+        // Update heatmap visibility
+        mapRef.current.setPaintProperty(
+          'stability-heat',
+          'heatmap-opacity',
+          viewMode === 'heat' ? 0.8 : 0
+        );
+      }
       
       // Update markers visibility (handled in updateMapMarkers)
       updateMapMarkers(regionsData);
@@ -1003,6 +1090,59 @@ export default function StabilityMap({
                 <Eye className="h-3.5 w-3.5 mr-1.5" />
                 View Detailed Report
               </button>
+            </div>
+          )}
+          
+          {/* Add Data Source Controls */}
+          {enableDataSourceSelection && (
+            <div className="absolute top-3 right-3 z-10 flex items-center space-x-2">
+              <button
+                onClick={() => setShowDataSourceSelector(!showDataSourceSelector)}
+                className="bg-white rounded-md shadow-sm px-2 py-1 text-xs flex items-center border border-gray-300"
+              >
+                <Database className="h-3 w-3 mr-1" />
+                Data Sources ({selectedDataSources.length})
+              </button>
+              
+              {selectedDataSources.length > 0 && (
+                <button
+                  onClick={() => setShowDataSourceInfo(!showDataSourceInfo)}
+                  className="bg-white rounded-md shadow-sm px-2 py-1 text-xs flex items-center border border-gray-300"
+                >
+                  <Info className="h-3 w-3 mr-1" />
+                  Info
+                </button>
+              )}
+            </div>
+          )}
+          
+          {/* Data Source Selector */}
+          {showDataSourceSelector && (
+            <div className="absolute top-12 right-3 z-20 w-80">
+              <DataSourceSelector
+                selectedSources={selectedDataSources}
+                onChange={handleDataSourceChange}
+                options={{
+                  allowMultiple: true,
+                  suggestedSources: getRecommendedSourcesForCurrentView(),
+                  filterDefaults: {
+                    minReliability: 70
+                  }
+                }}
+                showQualityScore={true}
+                className="shadow-lg"
+              />
+            </div>
+          )}
+          
+          {/* Data Source Info Panel */}
+          {showDataSourceInfo && (
+            <div className="absolute top-12 right-3 z-20 w-80">
+              <DataSourceInfoPanel
+                dataSourceIds={selectedDataSources}
+                onClose={() => setShowDataSourceInfo(false)}
+                className="shadow-lg"
+              />
             </div>
           )}
         </div>

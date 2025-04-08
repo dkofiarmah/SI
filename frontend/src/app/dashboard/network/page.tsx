@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Shuffle, Globe, Download, Info, Target, BrainCircuit,
   User, Building, ZoomIn, ZoomOut, UserPlus, Upload,
@@ -25,8 +26,8 @@ interface ConnectionEdge {
 }
 
 export default function NetworkPage() {
+  const router = useRouter();
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
   
   // Add missing state variables
@@ -50,88 +51,10 @@ export default function NetworkPage() {
   // Network analysis features
   const [analysisType, setAnalysisType] = useState<'influence' | 'risk' | 'connection'>('influence');
 
-  // Import Modal Component
-  const DataImportModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-[600px] max-h-[80vh] overflow-y-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold">Import Network Data</h3>
-          <button 
-            onClick={() => setShowImportModal(false)}
-            className="p-1 hover:bg-gray-100 rounded-full"
-          >
-            <span className="sr-only">Close</span>
-            ×
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-100 rounded-md p-4">
-            <h4 className="font-medium text-blue-800 mb-2">Enhance Your Network Analysis</h4>
-            <p className="text-sm text-blue-600">
-              Import your own entity and relationship data to combine with our intelligence network.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
-              <h5 className="font-medium mb-2 flex items-center">
-                <Upload className="h-5 w-5 text-blue-600 mr-2" />
-                Import Entity Data
-              </h5>
-              <p className="text-sm text-gray-600">
-                Upload your entity data in CSV or JSON format
-              </p>
-            </div>
-
-            <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
-              <h5 className="font-medium mb-2 flex items-center">
-                <Shuffle className="h-5 w-5 text-purple-600 mr-2" />
-                Import Relationship Data
-              </h5>
-              <p className="text-sm text-gray-600">
-                Upload connection data between entities
-              </p>
-            </div>
-
-            <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
-              <h5 className="font-medium mb-2 flex items-center">
-                <Globe className="h-5 w-5 text-green-600 mr-2" />
-                Connect to External Sources
-              </h5>
-              <p className="text-sm text-gray-600">
-                Link to external databases or APIs
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <h4 className="font-medium mb-2">Data Templates</h4>
-            <div className="space-y-2 text-sm">
-              <button className="text-blue-600 hover:underline block">
-                Download Entity Template (CSV)
-              </button>
-              <button className="text-blue-600 hover:underline block">
-                Download Relationship Template (CSV)
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end space-x-3">
-          <button 
-            onClick={() => setShowImportModal(false)}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-            Start Import
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  // Replace the modal opening function with navigation
+  const handleImportClick = () => {
+    router.push('/dashboard/data-import');
+  };
 
   // Analysis Panel Component
   const AnalysisPanel = () => (
@@ -201,7 +124,7 @@ export default function NetworkPage() {
       >
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => setShowImportModal(true)}
+            onClick={handleImportClick}
             className="flex items-center bg-blue-600 text-white rounded-md py-2 px-3 text-sm hover:bg-blue-700"
           >
             <Upload className="h-4 w-4 mr-1.5" />
@@ -545,9 +468,6 @@ export default function NetworkPage() {
             </div>
           </aside>
         )}
-
-        {/* Data Import Modal */}
-        {showImportModal && <DataImportModal />}
       </div>
     </div>
   );

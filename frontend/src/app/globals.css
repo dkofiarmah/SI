@@ -1,28 +1,68 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
 :root {
+  /* CIA/Mossad inspired color palette */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0e1c2f;
+  --primary: #14213d; /* Deep navy blue - primary brand color */
+  --primary-dark: #0b1526; /* Darker shade for hover states */
+  --primary-light: #2a3c5a; /* Lighter shade for secondary elements */
+  --secondary: #003865; /* Secondary blue */
+  --accent: #b72025; /* Mossad-inspired red accent for important elements */
+  --accent-light: #e63e43; /* Lighter version of accent */
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --neutral-700: #404040;
+  --neutral-800: #262626;
+  --neutral-900: #171717;
+  --success: #1e5631; /* Muted green for success states */
+  --warning: #ca8a04; /* Amber for warnings */
+  --danger: #b72025; /* Same as accent for consistency */
+  --info: #003865; /* Same as secondary for consistency */
+  
+  /* Typography */
+  --font-sans: 'Open Sans', system-ui, sans-serif;
+  --font-headings: 'Roboto Condensed', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --primary: #1a2f54;
+    --primary-dark: #0e1c2f;
+    --neutral-100: #1e1e1e;
+    --neutral-200: #2e2e2e;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--primary);
 }
 
 /* Mapbox container styles */
@@ -40,4 +80,115 @@ body {
 [class*='map-container'] {
   min-height: 300px;
   position: relative;
+}
+
+/* Intelligence agency inspired UI elements */
+.intel-header {
+  background-color: var(--primary);
+  color: white;
+  border-bottom: 3px solid var(--accent);
+}
+
+.intel-nav {
+  background-color: var(--primary-dark);
+}
+
+.intel-button {
+  font-family: var(--font-headings);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  transition: all 0.2s ease-in-out;
+}
+
+.intel-button-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.intel-button-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.intel-button-accent {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+}
+
+.intel-button-accent:hover {
+  background-color: var(--accent-light);
+}
+
+.intel-card {
+  border-radius: 4px;
+  border: 1px solid var(--neutral-200);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.intel-card-header {
+  background-color: var(--primary);
+  color: white;
+  padding: 12px 16px;
+  font-family: var(--font-headings);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Security-inspired elements */
+.classified-banner {
+  background-color: var(--accent);
+  color: white;
+  text-align: center;
+  padding: 6px 12px;
+  font-family: var(--font-headings);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.security-border {
+  border: 2px solid var(--primary);
+  position: relative;
+}
+
+.security-border::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed var(--neutral-300);
+  pointer-events: none;
+}
+
+/* Data visualization elements */
+.data-grid {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.data-grid th {
+  background-color: var(--primary);
+  color: white;
+  text-align: left;
+  padding: 10px;
+  font-weight: 600;
+  border: 1px solid var(--primary-dark);
+}
+
+.data-grid td {
+  padding: 8px 10px;
+  border: 1px solid var(--neutral-200);
+}
+
+.data-grid tr:nth-child(even) {
+  background-color: var(--neutral-100);
 }

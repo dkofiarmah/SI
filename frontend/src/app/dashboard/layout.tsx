@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useUser, useClerk } from '@clerk/nextjs';
 import {
   Globe, Search, Menu, ChevronDown,
   Network, Settings, Plus,
   ChevronLeft, ChevronRight, LayoutDashboard, Map, Shield, TrendingUp,
-  Database, User, BrainCircuit
+  Database, User, BrainCircuit, FileText, PieChart, Bell, BookMarked,
+  Users, Building2, MapPin, Calendar, Flag
 } from 'lucide-react';
 import AIHelperChat from '@/components/AIHelperChat';
 
@@ -16,6 +18,9 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, isLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
   const [isAiHelperOpen, setIsAiHelperOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -36,24 +41,63 @@ export default function DashboardLayout({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Navigation structure with tooltips for better UX
+  const handleSignOut = () => {
+    // Instead of directly calling signOut, navigate to the signout page
+    router.push('/auth/signout');
+  };
+
+  // Navigation structure with tooltips for better UX - Restructured to highlight core value proposition
   const navItems = [
     { 
       id: 'dashboard', 
-      label: 'Dashboard', 
+      label: 'Intelligence Dashboard', 
       path: '/dashboard', 
       icon: LayoutDashboard,
-      tooltip: 'Main intelligence dashboard with overview of all data'
+      tooltip: 'Main intelligence dashboard with comprehensive overview of all entities and insights'
     },
     { type: 'divider', id: 'div1'},
-    { type: 'header', id: 'analysis_header', label: 'Analysis Tools'},
+    
+    { type: 'header', id: 'entities_header', label: '360° Entity Intelligence'},
+    
     { 
-      id: 'geospatial', 
-      label: 'Geospatial Analysis', 
-      path: '/dashboard/geospatial', 
-      icon: Map,
-      tooltip: 'Analyze data through maps and geographic visualizations'
+      id: 'people', 
+      label: 'Key People', 
+      path: '/dashboard/entity/people', 
+      icon: Users,
+      tooltip: 'Explore comprehensive profiles of influential individuals and stakeholders'
     },
+    { 
+      id: 'organizations', 
+      label: 'Organizations', 
+      path: '/dashboard/entity/organizations', 
+      icon: Building2,
+      tooltip: 'Analyze organizations, their leadership, and connections to other entities'
+    },
+    { 
+      id: 'places', 
+      label: 'Places & Regions', 
+      path: '/dashboard/entity/places', 
+      icon: MapPin,
+      tooltip: 'Discover insights about locations, their economic indicators, and security status'
+    },
+    { 
+      id: 'events', 
+      label: 'Events & Incidents', 
+      path: '/dashboard/entity/events', 
+      icon: Calendar,
+      tooltip: 'Track significant events, their impact, and related stakeholders'
+    },
+    { 
+      id: 'countries', 
+      label: 'Country Analysis', 
+      path: '/dashboard/entity/countries', 
+      icon: Flag,
+      tooltip: 'Access comprehensive country profiles with key demographic, economic, and political data'
+    },
+    { type: 'divider', id: 'div2'},
+    
+    { type: 'header', id: 'analysis_header', label: 'Analysis Tools'},
+    
     { 
       id: 'network', 
       label: 'Network Analysis', 
@@ -62,30 +106,75 @@ export default function DashboardLayout({
       tooltip: 'Visualize relationships between entities and organizations'
     },
     { 
+      id: 'geospatial', 
+      label: 'Geospatial Analysis', 
+      path: '/dashboard/geospatial', 
+      icon: Map,
+      tooltip: 'Analyze data through maps and geographic visualizations'
+    },
+    { 
+      id: 'trends', 
+      label: 'Trend Analysis', 
+      path: '/dashboard/trends', 
+      icon: TrendingUp,
+      tooltip: 'Analyze trends and patterns in data over time'
+    },
+    { 
       id: 'scenario', 
       label: 'Scenario Planning', 
       path: '/dashboard/scenario', 
       icon: Shield,
       tooltip: 'Create and model potential scenarios to anticipate outcomes'
     },
-    { type: 'divider', id: 'div2'},
+    { type: 'divider', id: 'div3'},
+    
+    { type: 'header', id: 'intel_header', label: 'Intelligence Products'},
+    
     { 
       id: 'alerts', 
-      label: 'Alerts', 
+      label: 'Critical Alerts', 
       path: '/dashboard/alerts', 
-      icon: TrendingUp,
-      tooltip: 'View critical alerts and notifications',
+      icon: Bell,
+      tooltip: 'View time-sensitive alerts and critical notifications',
       badge: 3
     },
     { 
       id: 'reports', 
-      label: 'Reports', 
+      label: 'Intelligence Reports', 
       path: '/dashboard/reports', 
+      icon: BookMarked,
+      tooltip: 'Access and generate detailed intelligence reports'
+    },
+    { type: 'divider', id: 'div4'},
+    
+    { type: 'header', id: 'data_header', label: 'Data Management'},
+    
+    { 
+      id: 'data_sources', 
+      label: 'Data Sources', 
+      path: '/dashboard/data-sources', 
       icon: Database,
-      tooltip: 'Browse and generate detailed intelligence reports'
+      tooltip: 'Browse and manage available data sources'
+    },
+    { 
+      id: 'data_import', 
+      label: 'Data Import', 
+      path: '/dashboard/data-management', 
+      icon: FileText,
+      tooltip: 'Import and manage your custom data'
     },
   ];
 
+  // Show loading state while Clerk is initializing
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-100">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  // Rest of the component remains unchanged
   return (
     <div className="flex h-screen bg-gray-100 font-sans relative">
       {/* Sidebar */}
@@ -121,12 +210,12 @@ export default function DashboardLayout({
             <div className="relative group">
               <input 
                 type="text" 
-                placeholder="Search..." 
+                placeholder="Search entities, events, places..." 
                 className="w-full bg-gray-100 rounded-md pl-8 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm border border-gray-200" 
               />
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
               <div className="absolute hidden group-focus-within:block top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 p-2 text-xs text-gray-500 z-20">
-                Pro tip: Search for entities, locations, or topics
+                Pro tip: Search for people, organizations, locations, or events
               </div>
             </div>
           </div>
@@ -215,13 +304,13 @@ export default function DashboardLayout({
             className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center' : ''} p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-400`}
           >
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex-shrink-0 flex items-center justify-center text-gray-600 font-semibold">
-              DU
+              {user?.firstName?.[0]}{user?.lastName?.[0] || user?.firstName?.[1] || ''}
             </div>
             {!isSidebarCollapsed && (
               <>
                 <div className="flex-1 overflow-hidden whitespace-nowrap text-left ml-2">
-                  <span className="text-sm font-medium text-gray-700 block truncate">Demo User</span>
-                  <span className="text-xs text-gray-500 block truncate">Default Org</span>
+                  <span className="text-sm font-medium text-gray-700 block truncate">{user?.firstName} {user?.lastName}</span>
+                  <span className="text-xs text-gray-500 block truncate">{user?.primaryEmailAddress?.emailAddress}</span>
                 </div>
                 <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
               </>
@@ -231,7 +320,7 @@ export default function DashboardLayout({
           {isUserMenuOpen && (
             <div className={`absolute ${isSidebarCollapsed ? 'left-full ml-2 bottom-0' : 'bottom-full left-0 right-0 mb-1'} bg-white border border-gray-200 rounded-md shadow-lg py-1 z-20`}>
               <Link 
-                href="/dashboard/profile"
+                href="/dashboard/profile/preferences"
                 className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 onClick={() => setIsUserMenuOpen(false)}
               >
@@ -244,12 +333,12 @@ export default function DashboardLayout({
               >
                 <Settings className="h-4 w-4 mr-2 text-gray-500"/> Settings
               </Link>
-              <Link 
-                href="/auth/signin"
+              <button 
+                onClick={handleSignOut}
                 className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
               >
                 <ChevronLeft className="h-4 w-4 mr-2 text-gray-500"/> Sign Out
-              </Link>
+              </button>
             </div>
           )}
         </div>

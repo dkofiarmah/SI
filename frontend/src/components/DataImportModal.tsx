@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Database, Upload, Globe, Play, UploadCloud, X,
   Info, AlertTriangle, ChevronLeft, ChevronRight,
@@ -6,24 +6,30 @@ import {
   FileText, Link, BrainCircuit, Plus, AlertCircle,
   ArrowRight
 } from 'lucide-react';
+import { dataSourceTemplates } from '@/data/mock/data';
 
 export interface ImportConfig {
   sourceType: string;
   mapping: Record<string, string>;
-  options: {
-    delimiter?: string;
-    hasHeader?: boolean;
-    dateFormat?: string;
-    skipRows?: number;
-    [key: string]: string | number | boolean | undefined;
+  options: Record<string, any>;
+  name: string;
+  description: string;
+  scheduleRefresh: boolean;
+  refreshInterval: string;
+  refreshUnit: 'hours' | 'days' | 'weeks';
+  fieldMappings: FieldMapping[];
+  templateId?: string; // Add this new field
+  connectionDetails?: {
+    fileName?: string;
+    fileType?: string;
+    fileSize?: number;
+    host?: string;
+    port?: string;
+    database?: string;
+    username?: string;
+    apiEndpoint?: string;
+    authMethod?: string;
   };
-  name?: string;
-  description?: string;
-  scheduleRefresh?: boolean;
-  refreshInterval?: string;
-  refreshUnit?: 'hours' | 'days' | 'weeks';
-  connectionDetails?: any;
-  fieldMappings: FieldMapping[]; // Changed from optional to required
 }
 
 interface FieldMapping {
@@ -42,9 +48,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onImportComplete: (config: ImportConfig) => void;
+  initialTemplate?: string | null;
 }
 
-export default function DataImportModal({ isOpen, onClose, onImportComplete }: Props) {
+export default function DataImportModal({ isOpen, onClose, onImportComplete, initialTemplate }: Props) {
   const [currentStep, setCurrentStep] = useState<DataImportStep>('source');
   const [selectedSourceType, setSelectedSourceType] = useState<'file' | 'database' | 'api' | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,6 +78,33 @@ export default function DataImportModal({ isOpen, onClose, onImportComplete }: P
     refreshUnit: 'hours',
     fieldMappings: []
   });
+
+  // Add template handling logic
+  useEffect(() => {
+    if (initialTemplate) {
+      // Find the template in dataSourceTemplates
+      const template = dataSourceTemplates.find(t => t.id === initialTemplate);
+      if (template) {
+        setImportConfig(prev => ({
+          ...prev,
+          name: template.name,
+          description: `Based on ${template.name} template`,
+          templateId: template.id
+        }));
+        
+        // If this is a file template, prompt file selection
+        if (template.category === 'custom' || template.category === 'economy') {
+          setSelectedSourceType('file');
+        } else if (template.category === 'security') {
+          // For security data, default to database connection
+          setSelectedSourceType('database');
+        } else {
+          // For other templates, default to API
+          setSelectedSourceType('api');
+        }
+      }
+    }
+  }, [initialTemplate]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

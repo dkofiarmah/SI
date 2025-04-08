@@ -262,6 +262,84 @@ export const dataConnectorTypes = [
     }
 ];
 
+// Data Source Templates
+export const dataSourceTemplates = [
+    {
+        id: 'economic-indicators',
+        name: 'Economic Indicators',
+        description: 'Standard economic metrics including GDP, inflation, trade balances',
+        category: 'economy',
+        fields: ['date', 'country', 'indicator_name', 'value', 'previous_value', 'percent_change'],
+        recommended: true
+    },
+    {
+        id: 'security-incidents',
+        name: 'Security Incidents',
+        description: 'Security events, protests, conflicts and stability indicators',
+        category: 'security',
+        fields: ['date', 'location', 'event_type', 'severity', 'fatalities', 'description', 'source'],
+        recommended: true
+    },
+    {
+        id: 'political-events',
+        name: 'Political Events',
+        description: 'Elections, government changes, key political developments',
+        category: 'governance',
+        fields: ['date', 'country', 'event_type', 'actors_involved', 'description', 'impact_assessment'],
+        recommended: false
+    },
+    {
+        id: 'infrastructure-projects',
+        name: 'Infrastructure Projects',
+        description: 'Major infrastructure developments, status and investments',
+        category: 'infrastructure',
+        fields: ['project_name', 'country', 'location', 'sector', 'status', 'investment_amount', 'completion_date'],
+        recommended: false
+    },
+    {
+        id: 'custom',
+        name: 'Custom Data Structure',
+        description: 'Define your own data structure and mapping',
+        category: 'custom',
+        fields: [],
+        recommended: false
+    }
+];
+
+// Data Import Categories
+export const dataImportCategories = [
+    {
+        id: 'economy',
+        name: 'Economic Data',
+        description: 'Financial indicators, market data, and economic metrics',
+        icon: 'LineChart'
+    },
+    {
+        id: 'security',
+        name: 'Security & Risk',
+        description: 'Incident reports, threat assessments, and security events',
+        icon: 'Shield'
+    },
+    {
+        id: 'governance',
+        name: 'Political & Governance',
+        description: 'Political events, policy changes, and governance metrics',
+        icon: 'Landmark'
+    },
+    {
+        id: 'infrastructure',
+        name: 'Infrastructure & Development',
+        description: 'Projects, facilities, and development initiatives',
+        icon: 'Building'
+    },
+    {
+        id: 'custom',
+        name: 'Custom Datasets',
+        description: 'Import specialized data with custom field mappings',
+        icon: 'FilePlus'
+    }
+];
+
 // Enhanced data for network analysis
 export const networkEntities = [
     { id: 'e1', name: 'Ahmed Hassan', type: 'person', role: 'Egyptian Finance Minister', influence: 8.5, riskScore: 'Low' },
@@ -329,6 +407,50 @@ export const scenarioTemplates = [
     }
 ];
 
+// Enhanced scenario planning features
+export const advancedModelingTechniques = [
+    {
+        id: 'monte-carlo',
+        name: 'Monte Carlo Simulation',
+        description: 'Run thousands of random simulations to determine probability distributions of outcomes',
+        complexity: 'High',
+        dataRequirement: 'Medium',
+        icon: 'Sparkles'
+    },
+    {
+        id: 'bayesian',
+        name: 'Bayesian Network Analysis',
+        description: 'Model causal relationships between variables with probability-based inference',
+        complexity: 'High',
+        dataRequirement: 'High',
+        icon: 'Network'
+    },
+    {
+        id: 'system-dynamics',
+        name: 'System Dynamics Modeling',
+        description: 'Analyze complex systems with feedback loops and time-dependent behavior',
+        complexity: 'Medium',
+        dataRequirement: 'Medium',
+        icon: 'GitMerge'
+    },
+    {
+        id: 'agent-based',
+        name: 'Agent-Based Modeling',
+        description: 'Simulate actions and interactions of autonomous agents to assess emergent effects',
+        complexity: 'High',
+        dataRequirement: 'Medium',
+        icon: 'Users'
+    },
+    {
+        id: 'ml-forecasting',
+        name: 'Machine Learning Forecasting',
+        description: 'Use AI/ML algorithms to identify patterns and predict scenario outcomes',
+        complexity: 'Medium',
+        dataRequirement: 'High',
+        icon: 'BrainCircuit'
+    }
+];
+
 // Added helper types for TypeScript
 export type Region = typeof regions[number];
 export type Country = string;
@@ -337,5 +459,9 @@ export type ReportType = typeof reportTypes[number]['id'];
 export type Category = typeof categories[number];
 export type ReportTopic = typeof reportTopics[number];
 export type TimeRange = typeof timeRanges[number];
+export type DataConnectorType = typeof dataConnectorTypes[number]['id'];
+export type DataImportCategory = typeof dataImportCategories[number]['id'];
+export type DataSourceTemplate = typeof dataSourceTemplates[number]['id'];
+export type ModelingTechnique = typeof advancedModelingTechniques[number]['id'];
 
 // More types can be added as needed for type safety throughout the application

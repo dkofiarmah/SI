@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   TrendingUp, AlertCircle, Calendar, Zap, 
@@ -38,13 +38,8 @@ export default function RiskForecast({
   const [expandedAlertId, setExpandedAlertId] = useState<string | null>(null);
   const [anomalyDetected, setAnomalyDetected] = useState(false);
 
-  // Generate initial alerts
-  useEffect(() => {
-    refreshAlerts();
-  }, [selectedRegion, selectedCountry, timeframe]);
-
   // Function to generate a random alert
-  const generateRandomAlert = (id: string, severity: 'low' | 'medium' | 'high'): RiskAlert => {
+  const generateRandomAlert = useCallback((id: string, severity: 'low' | 'medium' | 'high'): RiskAlert => {
     const titles = {
       high: [
         'Political instability risk increasing',
@@ -132,10 +127,10 @@ export default function RiskForecast({
       timestamp: randomTimestamp,
       confidence: randomConfidence
     };
-  };
+  }, []);
 
-  // Function to refresh alerts
-  const refreshAlerts = () => {
+  // Function to refresh alerts - memoized with useCallback to prevent render issues
+  const refreshAlerts = useCallback(() => {
     setIsLoading(true);
     
     // Simulate API call delay
@@ -176,7 +171,12 @@ export default function RiskForecast({
       setAnomalyDetected(Math.random() > 0.7); // 30% chance of anomaly
       setIsLoading(false);
     }, 1200);
-  };
+  }, [generateRandomAlert]);
+
+  // Generate initial alerts
+  useEffect(() => {
+    refreshAlerts();
+  }, [selectedRegion, selectedCountry, timeframe, refreshAlerts]);
 
   // Function to toggle severity filter
   const toggleSeverityFilter = (severity: string) => {

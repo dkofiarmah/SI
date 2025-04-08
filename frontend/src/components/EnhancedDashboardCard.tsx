@@ -6,6 +6,7 @@ import {
   Zap, Check, AlertTriangle, ArrowUp, ArrowDown, ArrowRight,
   FileText, Share2, BarChart2, HelpCircle, Shield
 } from 'lucide-react';
+import { DataSource } from '@/types/dataSource';
 
 interface Trend {
   direction: 'up' | 'down' | 'stable';
@@ -13,13 +14,6 @@ interface Trend {
   label: string;
   percentChange?: number;
   comparedTo?: string;
-}
-
-interface DataSource {
-  name: string;
-  reliability: number;
-  lastUpdated: Date;
-  url?: string;
 }
 
 interface Insight {
@@ -53,12 +47,12 @@ interface EnhancedDashboardCardProps {
   refreshInterval?: number; // in seconds
   onRefresh?: () => void;
   isCollapsible?: boolean;
+  onCollapseChange?: (isCollapsed: boolean) => void;
   infoTooltip?: string;
   actions?: React.ReactNode;
   allowFavorite?: boolean;
   onFullScreenToggle?: () => void;
   className?: string;
-  // New enhanced props
   insights?: Insight[];
   dataSources?: DataSource[];
   dataFreshnessCritical?: boolean;
@@ -68,6 +62,7 @@ interface EnhancedDashboardCardProps {
   isRealTime?: boolean;
   shareableLink?: string;
   alertThreshold?: number;
+  showDataSourceInfo?: boolean;
 }
 
 export default function EnhancedDashboardCard({
@@ -81,12 +76,12 @@ export default function EnhancedDashboardCard({
   refreshInterval,
   onRefresh,
   isCollapsible = false,
+  onCollapseChange,
   infoTooltip,
   actions,
   allowFavorite = false,
   onFullScreenToggle,
   className = '',
-  // New enhanced props
   insights = [],
   dataSources = [],
   dataFreshnessCritical = false,
@@ -95,7 +90,8 @@ export default function EnhancedDashboardCard({
   benchmarks = [],
   isRealTime = false,
   shareableLink,
-  alertThreshold
+  alertThreshold,
+  showDataSourceInfo = false
 }: EnhancedDashboardCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -104,7 +100,7 @@ export default function EnhancedDashboardCard({
   const [refreshCountdown, setRefreshCountdown] = useState(refreshInterval || 0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showMetricInfo, setShowMetricInfo] = useState(false);
-  const [showDataSourceInfo, setShowDataSourceInfo] = useState(false);
+  const [showDataSourcesInfo, setShowDataSourcesInfo] = useState(false);
   const [showBenchmarks, setShowBenchmarks] = useState(false);
   
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -145,10 +141,16 @@ export default function EnhancedDashboardCard({
     
     if (refreshInterval && !isLoading && !isCollapsed) {
       setRefreshCountdown(refreshInterval);
+      
       interval = setInterval(() => {
         setRefreshCountdown(prev => {
           if (prev <= 1) {
-            if (onRefresh) onRefresh();
+            // Schedule the refresh callback to run after state update is complete
+            setTimeout(() => {
+              if (onRefresh) onRefresh();
+            }, 0);
+            
+            // Reset the countdown
             return refreshInterval;
           }
           return prev - 1;
@@ -247,102 +249,49 @@ export default function EnhancedDashboardCard({
       <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-10 p-3">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-medium text-gray-800 flex items-center">
-            <Database className="h-4 w-4 mr-1.5 text-blue-600" />
+            <Info className="h-4 w-4 mr-1.5 text-blue-600" />
             Data Sources
           </h3>
           <button 
-            onClick={() => setShowDataSourceInfo(false)}
-            className="text-gray-400 hover:text-gray-600"
+            onClick={() => setShowDataSourcesInfo(false)}
+            className="text-gray-500 hover:text-gray-700"
           >
-            <X className="h-4 w-4" />
+            ×
           </button>
         </div>
         
-        <div className="mb-3">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600">Overall Reliability:</span>
-            <span className={`font-medium ${
-              averageReliability >= 85 ? 'text-green-600' :
-              averageReliability >= 70 ? 'text-yellow-600' :
-              'text-red-600'
-            }`}>
-              {averageReliability}%
-            </span>
-          </div>
-          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full ${
-                averageReliability >= 85 ? 'bg-green-500' :
-                averageReliability >= 70 ? 'bg-yellow-500' :
-                'bg-red-500'
-              }`}
-              style={{ width: `${averageReliability}%` }}
-            ></div>
-          </div>
+        <div className="text-xs text-gray-600 mb-3">
+          This analysis is powered by {dataSources.length} data source{dataSources.length !== 1 ? 's' : ''} with 
+          an average reliability of {averageReliability}%.
         </div>
         
-        <div className="space-y-3 max-h-60 overflow-y-auto">
-          {dataSources.map((source, index) => (
-            <div key={index} className="border border-gray-100 rounded p-2 bg-gray-50">
-              <div className="flex justify-between">
-                <h4 className="text-sm font-medium text-gray-800">
-                  {source.name}
-                </h4>
+        <div className="space-y-2 max-h-60 overflow-y-auto mb-2">
+          {dataSources.map(source => (
+            <div key={source.id} className="border border-gray-200 rounded p-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-xs text-gray-700">{source.name}</span>
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                   source.reliability >= 85 ? 'bg-green-100 text-green-800' :
-                  source.reliability >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                  source.reliability >= 70 ? 'bg-blue-100 text-blue-800' :
+                  'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {source.reliability}% reliable
+                  {source.reliability}%
                 </span>
               </div>
-              
-              <div className="flex justify-between items-center mt-1.5 text-xs text-gray-500">
-                <div className="flex items-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  Updated {formatRelativeTime(source.lastUpdated)}
-                </div>
-                {source.url && (
-                  <a 
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer" 
-                    className="text-blue-600 hover:underline flex items-center"
-                  >
-                    View Source
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </a>
-                )}
-              </div>
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{source.description}</p>
+              {source.url && (
+                <a 
+                  href={source.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center mt-1"
+                >
+                  Details <ExternalLink className="h-3 w-3 ml-0.5" />
+                </a>
+              )}
             </div>
           ))}
         </div>
-        
-        {rawData?.available && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-600">
-                {rawData.recordCount && <span>Total Records: {rawData.recordCount}</span>}
-              </div>
-              <a 
-                href={rawData.downloadUrl || '#'}
-                className="text-blue-600 hover:underline text-xs flex items-center"
-              >
-                <Download className="h-3 w-3 mr-1" />
-                Download Raw Data
-              </a>
-            </div>
-            
-            {rawData.sampleData && (
-              <div className="mt-2 text-xs">
-                <div className="text-gray-500 mb-1">Sample Data:</div>
-                <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
-                  {JSON.stringify(rawData.sampleData, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     );
   };
@@ -495,6 +444,23 @@ export default function EnhancedDashboardCard({
     );
   };
   
+  // Add the data sources info button to the card header toolbar
+  const renderToolbar = () => {
+    return (
+      <div className="flex items-center">
+        {showDataSourceInfo && dataSources.length > 0 && (
+          <button
+            onClick={() => setShowDataSourcesInfo(!showDataSourcesInfo)}
+            className="relative p-1 rounded-full text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+            title="Data Sources"
+          >
+            <Info className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    );
+  };
+  
   return (
     <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}>
       {/* Card Header */}
@@ -529,7 +495,7 @@ export default function EnhancedDashboardCard({
                 className="text-gray-400 hover:text-gray-600 ml-1"
                 onClick={() => {
                   setShowMetricInfo(!showMetricInfo);
-                  setShowDataSourceInfo(false);
+                  setShowDataSourcesInfo(false);
                 }}
               >
                 <HelpCircle className="h-4 w-4" />
@@ -569,7 +535,7 @@ export default function EnhancedDashboardCard({
                   'text-red-600'
                 }`}
                 onClick={() => {
-                  setShowDataSourceInfo(!showDataSourceInfo);
+                  setShowDataSourcesInfo(!showDataSourcesInfo);
                   setShowMetricInfo(false);
                 }}
                 title="View data sources"
@@ -617,7 +583,11 @@ export default function EnhancedDashboardCard({
           
           {isCollapsible && (
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => {
+                const newCollapsedState = !isCollapsed;
+                setIsCollapsed(newCollapsedState);
+                if (onCollapseChange) onCollapseChange(newCollapsedState);
+              }}
               className="text-gray-400 hover:text-gray-600"
               title={isCollapsed ? 'Expand' : 'Collapse'}
             >

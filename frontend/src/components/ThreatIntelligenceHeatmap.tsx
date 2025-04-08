@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  AlertTriangle, MapPin, ExternalLink
+  AlertTriangle, MapPin, ExternalLink, Database, Info
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import DataSourceSelector from './DataSourceSelector';
+import DataSourceInfoPanel from './DataSourceInfoPanel';
+import { DataSource } from '@/types/dataSource';
+import { getRecommendedDataSources } from '@/lib/utils/dataSources';
 
 // Ensure the mapbox token is set
 if (!mapboxgl.accessToken) {
@@ -21,6 +25,8 @@ interface Props {
   selectedRegion: string;
   selectedCountry?: string;
   timeframe?: string;
+  height?: string;
+  enableDataSourceSelection?: boolean;
 }
 
 // Region coordinates map for centering the map based on region
@@ -51,11 +57,22 @@ const countryCoordinates: Record<string, [number, number]> = {
 const regionZoom = 4;
 const countryZoom = 5.5;
 
-export default function ThreatIntelligenceHeatmap({ selectedRegion, selectedCountry, timeframe = '30' }: Props) {
+export default function ThreatIntelligenceHeatmap({ 
+  selectedRegion, 
+  selectedCountry, 
+  timeframe = '30',
+  height = '400px',
+  enableDataSourceSelection = false
+}: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [threatCount, setThreatCount] = useState<number>(0);
+  const [selectedDataSources, setSelectedDataSources] = useState<string[]>([
+    'savannah-core', 'security-incidents', 'news-aggregation'
+  ]);
+  const [showDataSourceSelector, setShowDataSourceSelector] = useState(false);
+  const [showDataSourceInfo, setShowDataSourceInfo] = useState(false);
 
   // Get region-specific threat data
   const getRegionThreatData = () => {
@@ -228,38 +245,90 @@ export default function ThreatIntelligenceHeatmap({ selectedRegion, selectedCoun
     }
   }, [selectedRegion, selectedCountry, timeframe]);
 
+  const handleDataSourceChange = (sourceIds: string[]) => {
+    setSelectedDataSources(sourceIds);
+    console.log('Data sources changed:', sourceIds);
+  };
+
+  const getRecommendedSourcesForCurrentView = () => {
+    return getRecommendedDataSources(selectedRegion, 'security')
+      .map(source => source.id);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-lg text-gray-800 flex items-center">
-          <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
-          Threat Intelligence - {selectedCountry || selectedRegion}
-        </h2>
-        <a href="/dashboard/geospatial" className="text-blue-600 text-sm font-medium hover:underline flex items-center">
-          <ExternalLink className="h-4 w-4 mr-1.5" />
-          Full View
-        </a>
-      </div>
+    <div className="relative h-full">
+      <div 
+        ref={mapContainerRef} 
+        className="w-full rounded-lg overflow-hidden"
+        style={{ height }}
+      />
       
-      <div className="h-60 relative rounded-lg overflow-hidden border border-gray-200">
-        {loading && (
-          <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
-          </div>
-        )}
-        <div ref={mapContainerRef} className="absolute inset-0" />
-        
-        {!loading && (
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm p-2 rounded-md shadow-sm border border-gray-200 text-xs">
-            <div className="flex items-center text-gray-700">
-              <MapPin className="h-3 w-3 mr-1 text-red-500" />
-              <span className="font-semibold">{threatCount} Security Alerts</span>
-            </div>
-            <div className="mt-1 text-gray-500 text-[10px]">
-              Last {timeframe} days
-            </div>
-          </div>
-        )}
+      {loading && (
+        <div className="absolute inset-0 bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+        </div>
+      )}
+      
+      {enableDataSourceSelection && (
+        <div className="absolute top-3 right-3 z-10 flex items-center space-x-2">
+          <button
+            onClick={() => setShowDataSourceSelector(!showDataSourceSelector)}
+            className="bg-white rounded-md shadow-sm px-2 py-1 text-xs flex items-center border border-gray-300"
+          >
+            <Database className="h-3 w-3 mr-1" />
+            Data Sources ({selectedDataSources.length})
+          </button>
+          
+          {selectedDataSources.length > 0 && (
+            <button
+              onClick={() => setShowDataSourceInfo(!showDataSourceInfo)}
+              className="bg-white rounded-md shadow-sm px-2 py-1 text-xs flex items-center border border-gray-300"
+            >
+              <Info className="h-3 w-3 mr-1" />
+              Info
+            </button>
+          )}
+        </div>
+      )}
+      
+      {showDataSourceSelector && (
+        <div className="absolute top-12 right-3 z-20 w-80">
+          <DataSourceSelector
+            selectedSources={selectedDataSources}
+            onChange={handleDataSourceChange}
+            options={{
+              allowMultiple: true,
+              requiredTypes: ['security', 'intelligence', 'news', 'social'],
+              suggestedSources: getRecommendedSourcesForCurrentView(),
+              filterDefaults: {
+                types: ['security', 'intelligence', 'news', 'social'],
+                minReliability: 70
+              }
+            }}
+            showQualityScore={true}
+            className="shadow-lg"
+          />
+        </div>
+      )}
+      
+      {showDataSourceInfo && (
+        <div className="absolute top-12 right-3 z-20 w-80">
+          <DataSourceInfoPanel
+            dataSourceIds={selectedDataSources}
+            onClose={() => setShowDataSourceInfo(false)}
+            className="shadow-lg"
+          />
+        </div>
+      )}
+      
+      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm p-2 rounded-md shadow-sm border border-gray-200 text-xs">
+        <div className="flex items-center text-gray-700">
+          <MapPin className="h-3 w-3 mr-1 text-red-500" />
+          <span className="font-semibold">{threatCount} Security Alerts</span>
+        </div>
+        <div className="mt-1 text-gray-500 text-[10px]">
+          Last {timeframe} days
+        </div>
       </div>
       
       <div className="mt-3 text-xs text-gray-500 flex justify-between items-center">

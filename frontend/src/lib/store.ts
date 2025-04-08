@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Entity, Alert, Report, ScenarioRun, UserPreferences } from '@/types';
+import type { Entity, Alert, Report, ScenarioRun, UserPreferences, UserType } from '@/types';
 import { mockLocationData, mockAlerts, mockReports } from '@/data/mock/data';
 
 interface LocationData {
@@ -49,6 +49,12 @@ interface AppState {
   userPreferences: UserPreferences;
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
 
+  // New onboarding specific actions
+  setUserType: (userType: UserType) => void;
+  setUserInterests: (interests: string[]) => void;
+  setUserFocusRegions: (regions: string[]) => void;
+  completeOnboarding: () => void;
+
   // Data import tracking
   dataConnectors: {
     id: string;
@@ -85,7 +91,12 @@ export const useStore = create<AppState>()(
             sms: false
           },
           dataRefreshInterval: 300, // 5 minutes
-          theme: 'light'
+          theme: 'light',
+          // Initialize onboarding preferences
+          userType: undefined,
+          interests: [],
+          focusRegions: [],
+          onboardingCompleted: false
         },
         dataConnectors: [],
 
@@ -121,6 +132,23 @@ export const useStore = create<AppState>()(
 
         updateUserPreferences: (preferences) => set((state) => ({
           userPreferences: { ...state.userPreferences, ...preferences }
+        })),
+
+        // New onboarding specific actions
+        setUserType: (userType) => set((state) => ({
+          userPreferences: { ...state.userPreferences, userType }
+        })),
+
+        setUserInterests: (interests) => set((state) => ({
+          userPreferences: { ...state.userPreferences, interests }
+        })),
+
+        setUserFocusRegions: (focusRegions) => set((state) => ({
+          userPreferences: { ...state.userPreferences, focusRegions }
+        })),
+
+        completeOnboarding: () => set((state) => ({
+          userPreferences: { ...state.userPreferences, onboardingCompleted: true }
         })),
 
         addDataConnector: (connector) => set((state) => ({

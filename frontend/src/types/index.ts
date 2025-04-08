@@ -150,6 +150,8 @@ export interface DataConnector {
 }
 
 // User Preferences
+export type UserType = 'individual' | 'institution';
+
 export interface UserPreferences {
     defaultRegion?: string;
     defaultTimeRange?: string;
@@ -160,4 +162,10 @@ export interface UserPreferences {
     };
     dataRefreshInterval?: number;
     theme?: 'light' | 'dark' | 'system';
+    
+    // Onboarding preferences
+    userType?: UserType;
+    interests?: string[];
+    focusRegions?: string[];
+    onboardingCompleted?: boolean;
 }
